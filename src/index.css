@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green-light:   #e9f6ec;
+  --color-brand-green:         #1ea43e;
+  --color-brand-green-hover:   #1b9438;
+  --color-brand-green-active:  #188332;
+  --color-brand-green-dark:    #177b2f;
+  --color-brand-green-darker:  #0b3916;
+
+  --color-brand-yellow-light:  #fffdec;
+  --color-brand-yellow:        #fced3c;
+  --color-brand-yellow-hover:  #e3d536;
+  --color-brand-yellow-active: #cabe30;
+  --color-brand-yellow-dark:   #bdb22d;
+}
+
+@layer base {
+  body {
+    @apply bg-[#f8fafc] text-gray-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* ── Layout ── */
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden;
+  }
+
+  /* ── Tables ── */
+  .table-header {
+    @apply bg-gray-50 border-b border-gray-100 px-6 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-left;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 border-b border-gray-50 text-sm text-gray-600 align-middle;
+  }
+
+  .table-row {
+    @apply hover:bg-gray-50/80 transition-colors duration-200;
+  }
+
+  /* ── Buttons ── */
+  .btn, .btn-primary, .btn-secondary, .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-[#1ea43e] text-white hover:bg-[#1b9438] active:scale-95 shadow-sm shadow-brand-green/20;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 active:scale-95;
+  }
+
+  /* ── Badges ── */
+  .badge, .badge-green, .badge-yellow, .badge-red, .badge-blue, .badge-gray {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider;
+  }
+
+  .badge-green {
+    @apply bg-[#e9f6ec] text-[#177b2f];
+  }
+
+  .badge-yellow {
+    @apply bg-[#fffdec] text-[#92400e];
+  }
+
+  .badge-red {
+    @apply bg-red-50 text-red-700;
+  }
+
+  .badge-blue {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  .badge-gray {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  /* ── Forms ── */
+  .label {
+    @apply block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5;
+  }
+
+  .input {
+    @apply block w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl text-sm transition-all duration-200 focus:bg-white focus:border-brand-green outline-none placeholder:text-gray-400;
+  }
+
+  /* ── Custom Scrollbar ── */
+  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+}

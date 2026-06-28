@@ -1,0 +1,98 @@
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { serviceCategoriesApi } from '../../api/endpoints';
+import Modal from '../../components/ui/Modal';
+import { toast } from 'react-hot-toast';
+import { Folder, FileText, Hash } from 'lucide-react';
+
+export default function EditCategoryModal({ open, onClose, category }) {
+  const queryClient = useQueryClient();
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+
+  useEffect(() => {
+    if (category && open) {
+      reset({
+        name: category.name,
+        description: category.description || '',
+        sortOrder: category.sortOrder || 0
+      });
+    }
+  }, [category, open, reset]);
+
+  const mutation = useMutation({
+    mutationFn: (data) => {
+      const payload = {
+        ...data,
+        sortOrder: parseInt(data.sortOrder) || 0
+      };
+      return serviceCategoriesApi.update(category.id, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['service-categories'] });
+      toast.success('Category updated successfully');
+      onClose();
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to update category');
+    }
+  });
+
+  if (!category) return null;
+
+  return (
+    <Modal open={open} onClose={onClose} title="Edit Category Details" size="lg">
+      <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
+        
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <Folder className="w-3.5 h-3.5" /> Category Name
+          </label>
+          <input 
+            {...register('name', { required: 'Name is required' })}
+            className={`w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none ${errors.name ? 'ring-2 ring-red-100' : ''}`}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <Hash className="w-3.5 h-3.5" /> Display Order
+          </label>
+          <input 
+            type="number"
+            {...register('sortOrder')}
+            className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <FileText className="w-3.5 h-3.5" /> Description
+          </label>
+          <textarea 
+            {...register('description')}
+            className="w-full h-32 bg-slate-50 border-none rounded-[24px] px-5 py-4 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none resize-none"
+          />
+        </div>
+
+        <div className="pt-6 flex items-center gap-4 border-t border-slate-100">
+          <button 
+            type="button" 
+            onClick={onClose} 
+            className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            disabled={mutation.isPending}
+            className="flex-[2] h-14 bg-brand-green text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand-green/20 hover:bg-brand-green-dark hover:-translate-y-0.5 transition-all"
+          >
+            {mutation.isPending ? 'Saving...' : 'Update Category'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
