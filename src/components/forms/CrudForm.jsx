@@ -34,6 +34,7 @@ export default function CrudForm({ fields, initialData, onSubmit, loading }) {
               className="input"
               rows={3}
               required={field.required}
+              disabled={field.disabled}
             />
           ) : field.type === 'select' ? (
             <select
@@ -41,8 +42,9 @@ export default function CrudForm({ fields, initialData, onSubmit, loading }) {
               onChange={(e) => handleChange(field.name, e.target.value)}
               className="input"
               required={field.required}
+              disabled={field.disabled}
             >
-              <option value="">Select...</option>
+              <option value="">{field.placeholder || 'Select...'}</option>
               {field.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -61,6 +63,7 @@ export default function CrudForm({ fields, initialData, onSubmit, loading }) {
                         : current.filter(v => v !== opt.value);
                       handleChange(field.name, next);
                     }}
+                    disabled={field.disabled}
                     className="w-4 h-4 rounded border-gray-300 text-[#1ea43e] focus:ring-[#1ea43e]"
                   />
                   <span className="text-gray-700">{opt.label}</span>
@@ -72,6 +75,7 @@ export default function CrudForm({ fields, initialData, onSubmit, loading }) {
               type="checkbox"
               checked={!!formData[field.name]}
               onChange={(e) => handleChange(field.name, e.target.checked)}
+              disabled={field.disabled}
               className="w-4 h-4 rounded border-gray-300 text-[#1ea43e] focus:ring-[#1ea43e]"
             />
           ) : (
@@ -82,6 +86,7 @@ export default function CrudForm({ fields, initialData, onSubmit, loading }) {
               className="input"
               required={field.required}
               placeholder={field.placeholder}
+              disabled={field.disabled}
             />
           )}
         </div>
