@@ -203,31 +203,42 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
   const scannerRef = useRef(null);
 
   useEffect(() => {
+    let timer;
     if (isOpen && !scanResult) {
-      const html5QrCode = new Html5Qrcode("scanner-view");
-      scannerRef.current = html5QrCode;
-
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
-        async (decodedText) => {
-          // Success
-          await stopScanner();
-          handleValidateQR(decodedText);
-        },
-        (err) => {
-          // Silent scan frame failure
+      // Delay initialization slightly to guarantee the modal animation has finished and DOM element is attached
+      timer = setTimeout(() => {
+        const element = document.getElementById("scanner-view");
+        if (!element) {
+          console.warn("Scanner element not found in DOM yet");
+          return;
         }
-      ).catch(err => {
-        console.error("Camera access failed", err);
-        setScannerError("Camera not found or permission denied. You can manually enter/paste the QR data below:");
-      });
+
+        const html5QrCode = new Html5Qrcode("scanner-view");
+        scannerRef.current = html5QrCode;
+
+        html5QrCode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          async (decodedText) => {
+            // Success
+            await stopScanner();
+            handleValidateQR(decodedText);
+          },
+          (err) => {
+            // Silent scan frame failure
+          }
+        ).catch(err => {
+          console.error("Camera access failed", err);
+          setScannerError("Camera not found or permission denied. You can manually enter/paste the QR data below:");
+        });
+      }, 100);
     }
 
     return () => {
+      clearTimeout(timer);
       stopScanner();
     };
   }, [isOpen, scanResult]);
@@ -290,47 +301,45 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* 1. Showing Scanner Feed */}
-        {!scanResult && !isVerifying && (
-          <div className="space-y-4">
-            <p className="text-sm text-slate-500 text-center">
-              Position the member QR code within the scanner window to verify their attendance.
-            </p>
-            
-            {!scannerError && (
-              <div 
-                id="scanner-view" 
-                className="overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 aspect-square w-full max-w-xs mx-auto shadow-inner"
-              />
-            )}
+        {/* 1. Showing Scanner Feed (Using class-based show/hide so scanner-view element remains in the DOM) */}
+        <div className={!scanResult && !isVerifying ? "block space-y-4" : "hidden"}>
+          <p className="text-sm text-slate-500 text-center">
+            Position the member QR code within the scanner window to verify their attendance.
+          </p>
+          
+          <div 
+            id="scanner-view" 
+            className={`overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 aspect-square w-full max-w-xs mx-auto shadow-inner ${
+              scannerError ? "hidden" : "block"
+            }`}
+          />
 
-            {/* Manual input simulation */}
-            <div className="space-y-3 pt-2">
-              {scannerError && (
-                <div className="flex gap-2 items-start p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <p>{scannerError}</p>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder='Paste Member QR Data (e.g. {"memberId":"...", "membershipNo":"..."})'
-                  value={simulatedData}
-                  onChange={(e) => setSimulatedData(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green focus:outline-none"
-                />
-                <button
-                  onClick={() => handleValidateQR(simulatedData)}
-                  disabled={!simulatedData}
-                  className="bg-brand-green hover:bg-[#082a10] disabled:opacity-40 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
-                >
-                  Verify
-                </button>
+          {/* Manual input simulation */}
+          <div className="space-y-3 pt-2">
+            {scannerError && (
+              <div className="flex gap-2 items-start p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <p>{scannerError}</p>
               </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder='Paste Member QR Data (e.g. {"memberId":"...", "membershipNo":"..."})'
+                value={simulatedData}
+                onChange={(e) => setSimulatedData(e.target.value)}
+                className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green focus:outline-none"
+              />
+              <button
+                onClick={() => handleValidateQR(simulatedData)}
+                disabled={!simulatedData}
+                className="bg-brand-green hover:bg-[#082a10] disabled:opacity-40 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
+              >
+                Verify
+              </button>
             </div>
           </div>
-        )}
+        </div>
 
         {/* 2. Showing Member Profile & Subscription Preview */}
         {scanResult && !isVerifying && (
