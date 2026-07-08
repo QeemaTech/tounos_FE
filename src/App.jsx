@@ -31,6 +31,7 @@ import CategoriesPage from './pages/services/CategoriesPage';
 import TrainerProfilePage from './pages/trainers/TrainerProfilePage';
 import TherapistProfilePage from './pages/therapists/TherapistProfilePage';
 import AdminsPage from './pages/admins/AdminsPage';
+import AttendancePage from './pages/attendance/AttendancePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ export default function App() {
               <Route path="bookings" element={<BookingsPage />} />
               <Route path="subscriptions" element={<SubscriptionsPage />} />
               <Route path="payments" element={<PaymentsPage />} />
+              <Route path="attendance" element={<AttendancePage />} />
 
               {/* Catalog */}
               <Route path="services" element={<ServicesPage />} />

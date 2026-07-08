@@ -65,6 +65,8 @@ export const bookingsApi = {
 export const attendanceApi = {
   ...createCrudApi('attendance'),
   manualCheckIn: (data) => client.post('/admin/attendance/manual', data),
+  validateQR: (qrData) => client.post('/admin/attendance/validate-qr', { qrData }),
+  qrCheckIn: (qrData) => client.post('/admin/attendance/qr-check-in', { qrData }),
 };
 
 /* ── Payments ── */

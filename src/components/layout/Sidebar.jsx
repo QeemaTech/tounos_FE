@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, Users, CalendarDays, ClipboardList, Wallet, 
+  LayoutDashboard, Users, UserCheck, CalendarDays, ClipboardList, Wallet, 
   Dumbbell, GraduationCap, Heart, Package, 
   ShoppingCart, Tag, ListOrdered, Snowflake, 
   MessageSquare, BarChart3, Settings, GitBranch, X,
@@ -21,6 +21,7 @@ const NAV_GROUPS = [
       { path: '/bookings', icon: CalendarDays, label: 'Bookings' },
       { path: '/subscriptions', icon: ClipboardList, label: 'Subscriptions' },
       { path: '/payments', icon: Wallet, label: 'Payments' },
+      { path: '/attendance', icon: UserCheck, label: 'Attendance' },
     ]
   },
   {
