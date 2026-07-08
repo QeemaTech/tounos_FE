@@ -290,7 +290,7 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="QR Code Check-in" size="md">
+    <Modal open={isOpen} onClose={onClose} title="QR Code Check-in" size="md">
       <div className="space-y-6 p-1">
         
         {/* Verification Loading State */}
