@@ -11,7 +11,6 @@ import {
   Plus, MoreHorizontal, Edit2, Trash2, 
   Folder, Activity, Layers 
 } from 'lucide-react';
-import { getCategoryIcon } from './categoryIcons';
 import { toast } from 'react-hot-toast';
 
 export default function CategoriesPage() {
@@ -73,13 +72,16 @@ export default function CategoriesPage() {
               </thead>
               <tbody>
                 {categories.map((c) => {
-                  const CategoryIcon = getCategoryIcon(c.icon);
                   return (
                     <tr key={c.id} className="table-row group">
                       <td className="table-cell !px-10">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-green/10 group-hover:text-brand-green transition-all shadow-inner border border-slate-100">
-                            <CategoryIcon className="w-5 h-5" />
+                          <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-green/10 group-hover:text-brand-green transition-all shadow-inner border border-slate-100 p-2">
+                            {c.icon ? (
+                              <img src={c.icon} className="w-6 h-6 object-contain" alt={c.name} />
+                            ) : (
+                              <Folder className="w-5 h-5" />
+                            )}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">

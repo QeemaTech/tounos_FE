@@ -4,7 +4,6 @@ import { serviceCategoriesApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { toast } from 'react-hot-toast';
 import { Folder, FileText, Hash, Activity } from 'lucide-react';
-import { getCategoryIcon } from './categoryIcons';
 
 export default function CreateCategoryModal({ open, onClose }) {
   const queryClient = useQueryClient();
@@ -81,23 +80,22 @@ export default function CreateCategoryModal({ open, onClose }) {
             <Activity className="w-3.5 h-3.5" /> Select Sports Icon
           </label>
           <div className="grid grid-cols-5 gap-2 max-h-44 overflow-y-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
-            {icons.map((iconName) => {
-              const IconComponent = getCategoryIcon(iconName);
-              const isSelected = watchIcon === iconName;
+            {icons.map(({ name, url }) => {
+              const isSelected = watchIcon === name;
               return (
                 <button
-                  key={iconName}
+                  key={name}
                   type="button"
-                  onClick={() => setValue('icon', iconName)}
-                  className={`p-3 rounded-xl flex flex-col items-center justify-center gap-1 border-2 transition-all ${
+                  onClick={() => setValue('icon', name)}
+                  className={`p-3 rounded-xl flex flex-col items-center justify-center gap-2 border-2 transition-all ${
                     isSelected 
                       ? 'border-brand-green bg-brand-green/10 text-brand-green' 
                       : 'border-transparent bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600'
                   }`}
-                  title={iconName}
+                  title={name}
                 >
-                  <IconComponent className="w-5 h-5" />
-                  <span className="text-[8px] font-bold uppercase truncate w-full text-center">{iconName}</span>
+                  <img src={url} className="w-6 h-6 object-contain" alt={name} />
+                  <span className="text-[8px] font-bold uppercase truncate w-full text-center">{name}</span>
                 </button>
               );
             })}
