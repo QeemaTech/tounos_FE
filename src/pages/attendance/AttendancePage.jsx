@@ -392,18 +392,16 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
           )}
 
           <p className="text-sm text-slate-500 text-center">
-            Position the member QR code within the scanner window to verify their attendance.
+            Position the QR code within the frame below to scan, or type the member's number manually.
           </p>
-          
-          <div 
-            id="scanner-view" 
-            className={`overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 aspect-square w-full max-w-xs mx-auto shadow-inner ${
-              scannerError ? "hidden" : "block"
-            }`}
-          />
 
-          {/* Manual input simulation */}
-          <div className="space-y-3 pt-2">
+          {/* Scanner box — fixed square using padding-bottom trick */}
+          <div className={`relative w-full overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 shadow-inner ${scannerError ? 'hidden' : 'block'}`} style={{ paddingBottom: '100%' }}>
+            <div id="scanner-view" className="absolute inset-0" />
+          </div>
+
+          {/* Manual input */}
+          <div className="space-y-3">
             {scannerError && (
               <div className="flex gap-2 items-start p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
                 <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -413,15 +411,16 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder='Paste Member QR Data (e.g. {"memberId":"...", "membershipNo":"..."})'
+                placeholder="Enter Membership No. (e.g. TC-001) or Member ID"
                 value={simulatedData}
                 onChange={(e) => setSimulatedData(e.target.value)}
-                className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green focus:outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && handleValidateQR(simulatedData)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green focus:outline-none"
               />
               <button
                 onClick={() => handleValidateQR(simulatedData)}
-                disabled={!simulatedData}
-                className="bg-brand-green hover:bg-[#082a10] disabled:opacity-40 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                disabled={!simulatedData.trim()}
+                className="bg-brand-green hover:bg-[#082a10] disabled:opacity-40 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap"
               >
                 Verify
               </button>
