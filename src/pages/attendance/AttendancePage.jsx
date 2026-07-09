@@ -38,7 +38,7 @@ export default function AttendancePage() {
   const meta = data?.meta;
 
   return (
-    <div className="p-8 space-y-8 bg-slate-50 min-h-screen font-inter">
+    <div className="px-4 py-6 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen font-inter">
       <PageHeader 
         title="Attendance & Check-in" 
         subtitle="Manage member entry logs and verify attendance QR codes" 
@@ -46,25 +46,26 @@ export default function AttendancePage() {
         actions={
           <button 
             onClick={() => setIsScanModalOpen(true)}
-            className="bg-brand-green hover:bg-[#082a10] text-white !rounded-2xl !py-3 !px-6 shadow-lg shadow-brand-green/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5"
+            className="bg-brand-green hover:bg-[#082a10] text-white !rounded-2xl !py-2.5 !px-4 md:!py-3 md:!px-6 shadow-lg shadow-brand-green/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5 text-sm md:text-base"
           >
-            <Camera className="w-5 h-5" />
-            Scan QR Code
+            <Camera className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden sm:inline">Scan QR Code</span>
+            <span className="sm:hidden">Scan QR</span>
           </button>
         }
       />
 
       {/* Filters Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
         {/* Search */}
-        <div className="relative">
+        <div className="relative sm:col-span-2 md:col-span-1">
           <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
           <input
             type="text"
             placeholder="Search member name or code..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all text-sm"
           />
         </div>
 
@@ -75,7 +76,7 @@ export default function AttendancePage() {
             type="date"
             value={date}
             onChange={(e) => { setDate(e.target.value); setPage(1); }}
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all text-sm"
           />
         </div>
 
@@ -86,7 +87,7 @@ export default function AttendancePage() {
             value={branchFilter}
             onChange={(e) => { setBranchFilter(e.target.value); setPage(1); }}
             disabled={isBranchLocked}
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm"
           >
             <option value="">All Branches</option>
             {branches.map(b => (
@@ -96,7 +97,7 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* Logs Table */}
+      {/* Logs Table/Cards */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-12"><LoadingSpinner /></div>
@@ -107,53 +108,93 @@ export default function AttendancePage() {
             <p className="text-sm">Scan a QR code or create a manual entry to get started.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  <th className="px-6 py-4">Member Name</th>
-                  <th className="px-6 py-4">Membership No</th>
-                  <th className="px-6 py-4">Branch</th>
-                  <th className="px-6 py-4">Check-in Time</th>
-                  <th className="px-6 py-4">Method</th>
-                  <th className="px-6 py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {logs.map(log => (
-                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-900">
-                      {log.member?.firstName} {log.member?.lastName}
-                    </td>
-                    <td className="px-6 py-4 text-slate-500 font-mono">
-                      {log.member?.membershipNo}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-600">
-                      {log.branch?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">
-                      {new Date(log.checkInTime).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-slate-600">
-                      <span className={`px-2.5 py-1 rounded-full text-xs ${
-                        log.method === 'QR' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'
-                      }`}>
-                        {log.method}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={log.status} />
-                    </td>
+          <>
+            {/* Desktop Table — hidden on small screens */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    <th className="px-6 py-4">Member Name</th>
+                    <th className="px-6 py-4">Membership No</th>
+                    <th className="px-6 py-4">Branch</th>
+                    <th className="px-6 py-4">Check-in Time</th>
+                    <th className="px-6 py-4">Method</th>
+                    <th className="px-6 py-4">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {logs.map(log => (
+                    <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-900">
+                        {log.member?.firstName} {log.member?.lastName}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 font-mono">
+                        {log.member?.membershipNo}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-600">
+                        {log.branch?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 font-medium">
+                        {new Date(log.checkInTime).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-slate-600">
+                        <span className={`px-2.5 py-1 rounded-full text-xs ${
+                          log.method === 'QR' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'
+                        }`}>
+                          {log.method}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={log.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards — shown only on small screens */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {logs.map(log => (
+                <div key={log.id} className="p-4 space-y-3 hover:bg-slate-50/40 transition-colors">
+                  {/* Top row: name + status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm leading-tight">
+                        {log.member?.firstName} {log.member?.lastName}
+                      </p>
+                      <p className="text-xs text-slate-400 font-mono mt-0.5">
+                        {log.member?.membershipNo}
+                      </p>
+                    </div>
+                    <StatusBadge status={log.status} />
+                  </div>
+
+                  {/* Bottom row: branch + time + method */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <GitBranch className="w-3.5 h-3.5 text-slate-400" />
+                      {log.branch?.name || '-'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      {new Date(log.checkInTime).toLocaleString()}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                      log.method === 'QR' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-700'
+                    }`}>
+                      {log.method}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex items-center justify-between px-4 md:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
             <span className="text-sm font-medium text-slate-500">
               Page {meta.page} of {meta.totalPages}
             </span>
@@ -161,14 +202,14 @@ export default function AttendancePage() {
               <button
                 disabled={meta.page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="btn-secondary !py-2 !px-4 disabled:opacity-50"
+                className="btn-secondary !py-2 !px-4 disabled:opacity-50 text-sm"
               >
                 Previous
               </button>
               <button
                 disabled={meta.page >= meta.totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="btn-secondary !py-2 !px-4 disabled:opacity-50"
+                className="btn-secondary !py-2 !px-4 disabled:opacity-50 text-sm"
               >
                 Next
               </button>
