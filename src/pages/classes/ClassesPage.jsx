@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Clock, Users as UsersIcon, Plus, MapPin, 
   MoreHorizontal, Edit2, Trash2, Calendar as CalendarIcon, 
@@ -14,13 +15,29 @@ import CreateClassModal from './CreateClassModal';
 import AddScheduleModal from './AddScheduleModal';
 import { useBranchScope } from '../../hooks/useBranchScope';
 import { toast } from 'react-hot-toast';
+import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 const DAY_SHORT = { MONDAY: 'Mon', TUESDAY: 'Tue', WEDNESDAY: 'Wed', THURSDAY: 'Thu', FRIDAY: 'Fri', SATURDAY: 'Sat', SUNDAY: 'Sun' };
 
 export default function ClassesPage() {
   const qc = useQueryClient();
-  const [tab, setTab] = useState('classes');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') === 'schedules' ? 'schedules' : 'classes';
+  const [tab, setTab] = useState(defaultTab);
+  
+  useEffect(() => {
+    const currentTab = searchParams.get('tab');
+    if (currentTab === 'schedules' || currentTab === 'classes') {
+      setTab(currentTab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (newTab) => {
+    setTab(newTab);
+    setSearchParams({ tab: newTab });
+  };
+
   const { branches, isBranchLocked, defaultBranchId } = useBranchScope();
   const [selectedBranch, setSelectedBranch] = useState(defaultBranchId || '');
 
@@ -88,17 +105,19 @@ export default function ClassesPage() {
         }
       />
 
+      <ServiceSetupStepper activeStep={tab === 'classes' ? 3 : 4} />
+
       {/* Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex gap-1 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
           <button 
-            onClick={() => setTab('classes')} 
+            onClick={() => handleTabChange('classes')} 
             className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${tab === 'classes' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             Classes Catalog
           </button>
           <button 
-            onClick={() => setTab('schedules')} 
+            onClick={() => handleTabChange('schedules')} 
             className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${tab === 'schedules' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             Weekly Schedules

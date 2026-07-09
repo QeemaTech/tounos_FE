@@ -12,6 +12,7 @@ import {
   LayoutList, Type, DollarSign, Activity 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
 
 export default function ServicesPage() {
   const queryClient = useQueryClient();
@@ -52,6 +53,8 @@ export default function ServicesPage() {
           </button>
         }
       />
+
+      <ServiceSetupStepper activeStep={2} />
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden">
         {isLoading ? (

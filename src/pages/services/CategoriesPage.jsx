@@ -12,6 +12,7 @@ import {
   Folder, Activity, Layers 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
@@ -52,6 +53,8 @@ export default function CategoriesPage() {
           </button>
         }
       />
+
+      <ServiceSetupStepper activeStep={1} />
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden">
         {isLoading ? (
