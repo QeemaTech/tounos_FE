@@ -48,7 +48,19 @@ export default function CreateServiceModal({ open, onClose }) {
           icon: '🚀',
           duration: 4000
         });
-        navigate('/classes');
+        navigate('/classes?tab=classes');
+      } else if (variables.serviceType === 'PRIVATE_TRAINING') {
+        toast.success('Global Service created! Redirecting to manage trainers...', {
+          icon: '💪',
+          duration: 4000
+        });
+        navigate('/trainers');
+      } else if (variables.serviceType === 'MASSAGE') {
+        toast.success('Global Service created! Redirecting to manage therapists...', {
+          icon: '💆‍♀️',
+          duration: 4000
+        });
+        navigate('/therapists');
       } else {
         toast.success('Global Service created and added to catalog!');
       }
