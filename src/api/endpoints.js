@@ -40,7 +40,10 @@ export const trainersApi  = createCrudApi('trainers');
 export const therapistsApi = createCrudApi('therapists');
 
 /* ── Services & Classes ── */
-export const serviceCategoriesApi = createCrudApi('service-categories');
+export const serviceCategoriesApi = {
+  ...createCrudApi('service-categories'),
+  getIcons: () => client.get('/admin/service-categories/icons'),
+};
 export const servicesApi    = createCrudApi('services');
 export const classesApi     = createCrudApi('classes');
 export const schedulesApi   = createCrudApi('schedules');

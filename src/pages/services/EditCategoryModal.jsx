@@ -1,25 +1,38 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { serviceCategoriesApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import { Folder, FileText, Hash } from 'lucide-react';
+import { Folder, FileText, Hash, Activity } from 'lucide-react';
+import { getCategoryIcon } from './categoryIcons';
 
 export default function EditCategoryModal({ open, onClose, category }) {
   const queryClient = useQueryClient();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm();
 
   useEffect(() => {
     if (category && open) {
       reset({
         name: category.name,
+        nameAr: category.nameAr || '',
         description: category.description || '',
-        sortOrder: category.sortOrder || 0
+        sortOrder: category.sortOrder || 0,
+        icon: category.icon || 'dumbbell'
       });
     }
   }, [category, open, reset]);
+
+  const watchIcon = watch('icon');
+
+  const { data: iconsData } = useQuery({
+    queryKey: ['category-icons'],
+    queryFn: () => serviceCategoriesApi.getIcons().then(r => r.data.data),
+    enabled: open
+  });
+
+  const icons = iconsData || [];
 
   const mutation = useMutation({
     mutationFn: (data) => {
@@ -45,14 +58,54 @@ export default function EditCategoryModal({ open, onClose, category }) {
     <Modal open={open} onClose={onClose} title="Edit Category Details" size="lg">
       <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
         
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <Folder className="w-3.5 h-3.5" /> Category Name (English)
+            </label>
+            <input 
+              {...register('name', { required: 'Name is required' })}
+              className={`w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none ${errors.name ? 'ring-2 ring-red-100' : ''}`}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <Folder className="w-3.5 h-3.5" /> Category Name (Arabic)
+            </label>
+            <input 
+              {...register('nameAr')}
+              className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <Folder className="w-3.5 h-3.5" /> Category Name
+            <Activity className="w-3.5 h-3.5" /> Select Sports Icon
           </label>
-          <input 
-            {...register('name', { required: 'Name is required' })}
-            className={`w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none ${errors.name ? 'ring-2 ring-red-100' : ''}`}
-          />
+          <div className="grid grid-cols-5 gap-2 max-h-44 overflow-y-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            {icons.map((iconName) => {
+              const IconComponent = getCategoryIcon(iconName);
+              const isSelected = watchIcon === iconName;
+              return (
+                <button
+                  key={iconName}
+                  type="button"
+                  onClick={() => setValue('icon', iconName)}
+                  className={`p-3 rounded-xl flex flex-col items-center justify-center gap-1 border-2 transition-all ${
+                    isSelected 
+                      ? 'border-brand-green bg-brand-green/10 text-brand-green' 
+                      : 'border-transparent bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600'
+                  }`}
+                  title={iconName}
+                >
+                  <IconComponent className="w-5 h-5" />
+                  <span className="text-[8px] font-bold uppercase truncate w-full text-center">{iconName}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="space-y-2">

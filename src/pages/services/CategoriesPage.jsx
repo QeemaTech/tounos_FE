@@ -11,6 +11,7 @@ import {
   Plus, MoreHorizontal, Edit2, Trash2, 
   Folder, Activity, Layers 
 } from 'lucide-react';
+import { getCategoryIcon } from './categoryIcons';
 import { toast } from 'react-hot-toast';
 
 export default function CategoriesPage() {
@@ -71,44 +72,54 @@ export default function CategoriesPage() {
                 </tr>
               </thead>
               <tbody>
-                {categories.map((c) => (
-                  <tr key={c.id} className="table-row group">
-                    <td className="table-cell !px-10">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-green/10 group-hover:text-brand-green transition-all shadow-inner border border-slate-100">
-                          <Folder className="w-5 h-5" />
+                {categories.map((c) => {
+                  const CategoryIcon = getCategoryIcon(c.icon);
+                  return (
+                    <tr key={c.id} className="table-row group">
+                      <td className="table-cell !px-10">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-green/10 group-hover:text-brand-green transition-all shadow-inner border border-slate-100">
+                            <CategoryIcon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-black text-slate-900 leading-tight">{c.name}</p>
+                              {c.nameAr && (
+                                <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-lg font-bold">
+                                  {c.nameAr}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-bold truncate max-w-[200px] mt-0.5">{c.description || 'No description'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-black text-slate-900 leading-tight">{c.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold truncate max-w-[200px] mt-0.5">{c.description || 'No description'}</p>
+                      </td>
+                      <td className="table-cell text-center">
+                        <div className="inline-flex flex-col items-center">
+                          <span className="font-black text-slate-900">{c._count?.services || 0}</span>
+                          <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Services Linked</span>
                         </div>
-                      </div>
-                    </td>
-                    <td className="table-cell text-center">
-                      <div className="inline-flex flex-col items-center">
-                        <span className="font-black text-slate-900">{c._count?.services || 0}</span>
-                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Services Linked</span>
-                      </div>
-                    </td>
-                    <td className="table-cell text-center">
-                      <StatusBadge status={c.isActive ? 'ACTIVE' : 'ARCHIVED'} />
-                    </td>
-                    <td className="table-cell text-right !px-10">
-                      <CategoryActions 
-                        isActive={c.isActive}
-                        onEdit={() => {
-                          setSelectedCategory(c);
-                          setIsEditModalOpen(true);
-                        }} 
-                        onToggleStatus={() => {
-                          if (window.confirm(`Are you sure you want to ${c.isActive ? 'deactivate' : 'reactivate'} this category?`)) {
-                            toggleStatusMutation.mutate({ id: c.id, isActive: c.isActive });
-                          }
-                        }} 
-                      />
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="table-cell text-center">
+                        <StatusBadge status={c.isActive ? 'ACTIVE' : 'ARCHIVED'} />
+                      </td>
+                      <td className="table-cell text-right !px-10">
+                        <CategoryActions 
+                          isActive={c.isActive}
+                          onEdit={() => {
+                            setSelectedCategory(c);
+                            setIsEditModalOpen(true);
+                          }} 
+                          onToggleStatus={() => {
+                            if (window.confirm(`Are you sure you want to ${c.isActive ? 'deactivate' : 'reactivate'} this category?`)) {
+                              toggleStatusMutation.mutate({ id: c.id, isActive: c.isActive });
+                            }
+                          }} 
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
                 {categories.length === 0 && (
                   <tr>
                     <td colSpan={4} className="py-32 text-center">
