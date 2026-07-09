@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { bookingsApi, membersApi, servicesApi, schedulesApi } from '../../api/endpoints';
+import { bookingsApi, membersApi, servicesApi, schedulesApi, trainersApi, therapistsApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { useBranchScope } from '../../hooks/useBranchScope';
 import { toast } from 'react-hot-toast';
@@ -30,6 +30,8 @@ export default function CreateBookingModal({ open, onClose }) {
       branchId: '',
       scheduleId: '',
       serviceId: '',
+      trainerId: '',
+      therapistId: '',
       bookingDate: new Date().toISOString().split('T')[0],
       startTime: '10:00',
       endTime: '11:00',
@@ -79,6 +81,20 @@ export default function CreateBookingModal({ open, onClose }) {
     queryKey: ['schedules-by-branch', watchBranchId],
     queryFn: () => schedulesApi.list({ branchId: watchBranchId, pageSize: 100 }).then(r => r.data.data),
     enabled: open && bookingType === 'GROUP_CLASS' && !!watchBranchId
+  });
+
+  // 5. Trainers (for Private Training)
+  const { data: trainers } = useQuery({
+    queryKey: ['trainers-by-branch', watchBranchId],
+    queryFn: () => trainersApi.list({ branchId: watchBranchId, pageSize: 100 }).then(r => r.data.data),
+    enabled: open && bookingType === 'PRIVATE_TRAINING' && !!watchBranchId
+  });
+
+  // 6. Therapists (for Massage)
+  const { data: therapists } = useQuery({
+    queryKey: ['therapists-by-branch', watchBranchId],
+    queryFn: () => therapistsApi.list({ branchId: watchBranchId, pageSize: 100 }).then(r => r.data.data),
+    enabled: open && bookingType === 'MASSAGE' && !!watchBranchId
   });
 
   // ── Business Logic ──
@@ -163,6 +179,11 @@ export default function CreateBookingModal({ open, onClose }) {
       payload.serviceId = data.serviceId;
       payload.startTime = data.startTime;
       payload.endTime = data.endTime;
+      if (bookingType === 'PRIVATE_TRAINING') {
+        payload.trainerId = data.trainerId;
+      } else if (bookingType === 'MASSAGE') {
+        payload.therapistId = data.therapistId;
+      }
     }
 
     mutation.mutate(payload);
@@ -381,6 +402,33 @@ export default function CreateBookingModal({ open, onClose }) {
                         {services?.map(s => <option key={s.id} value={s.id}>{s.name} (EGP {s.price})</option>)}
                       </select>
                    </div>
+
+                   {bookingType === 'PRIVATE_TRAINING' && (
+                     <div className="col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Select Trainer</label>
+                        <select 
+                          {...register('trainerId', { required: bookingType === 'PRIVATE_TRAINING' })}
+                          className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/10 appearance-none"
+                        >
+                          <option value="">Choose Trainer...</option>
+                          {trainers?.map(t => <option key={t.id} value={t.id}>{t.firstName} {t.lastName} ({t.speciality || 'Fitness'})</option>)}
+                        </select>
+                     </div>
+                   )}
+
+                   {bookingType === 'MASSAGE' && (
+                     <div className="col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Select Therapist</label>
+                        <select 
+                          {...register('therapistId', { required: bookingType === 'MASSAGE' })}
+                          className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/10 appearance-none"
+                        >
+                          <option value="">Choose Therapist...</option>
+                          {therapists?.map(t => <option key={t.id} value={t.id}>{t.firstName} {t.lastName} ({t.speciality || 'Massage'})</option>)}
+                        </select>
+                     </div>
+                   )}
+
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Time Start</label>
                       <input type="time" {...register('startTime')} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 text-sm font-bold text-slate-800" />

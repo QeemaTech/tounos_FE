@@ -20,6 +20,7 @@ export default function CreateServiceModal({ open, onClose }) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
+      nameAr: '',
       categoryId: '',
       description: '',
       serviceType: 'GROUP_CLASS',
@@ -32,6 +33,7 @@ export default function CreateServiceModal({ open, onClose }) {
     mutationFn: (data) => {
       const payload = {
         name: data.name,
+        nameAr: data.nameAr || "",
         categoryId: data.categoryId,
         serviceType: data.serviceType,
         description: data.description || "",
@@ -78,10 +80,10 @@ export default function CreateServiceModal({ open, onClose }) {
       <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
         
         <div className="grid grid-cols-2 gap-6">
-          {/* Service Name */}
+          {/* Service Name (English) */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <LayoutList className="w-3.5 h-3.5" /> Service Identity (Global)
+              <LayoutList className="w-3.5 h-3.5" /> Service Name (English)
             </label>
             <input 
               {...register('name', { required: 'Name is required' })}
@@ -90,6 +92,20 @@ export default function CreateServiceModal({ open, onClose }) {
             />
           </div>
 
+          {/* Service Name (Arabic) */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <LayoutList className="w-3.5 h-3.5" /> Service Name (Arabic)
+            </label>
+            <input 
+              {...register('nameAr')}
+              placeholder="مثال: حصة تدريب عالي الكثافة"
+              className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
           {/* Category */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -103,9 +119,7 @@ export default function CreateServiceModal({ open, onClose }) {
               {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-6">
           {/* Service Type */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -120,7 +134,8 @@ export default function CreateServiceModal({ open, onClose }) {
               <option value="MASSAGE">Massage</option>
             </select>
           </div>
-
+        </div>
+        <div className="grid grid-cols-2 gap-6">
           {/* Duration */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -132,9 +147,7 @@ export default function CreateServiceModal({ open, onClose }) {
               className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-6">
           {/* Price */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">

@@ -22,6 +22,7 @@ export default function EditServiceModal({ open, onClose, service }) {
     if (service && open) {
       reset({
         name: service.name,
+        nameAr: service.nameAr || '',
         categoryId: service.categoryId,
         description: service.description || '',
         serviceType: service.serviceType,
@@ -35,6 +36,7 @@ export default function EditServiceModal({ open, onClose, service }) {
     mutationFn: (data) => {
       const payload = {
         ...data,
+        nameAr: data.nameAr || '',
         price: parseFloat(data.price) || 0,
         duration: parseInt(data.duration) || 60
       };
@@ -57,9 +59,10 @@ export default function EditServiceModal({ open, onClose, service }) {
       <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
         
         <div className="grid grid-cols-2 gap-6">
+          {/* Service Name (English) */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <LayoutList className="w-3.5 h-3.5" /> Service Name
+              <LayoutList className="w-3.5 h-3.5" /> Service Name (English)
             </label>
             <input 
               {...register('name', { required: 'Name is required' })}
@@ -67,6 +70,21 @@ export default function EditServiceModal({ open, onClose, service }) {
             />
           </div>
 
+          {/* Service Name (Arabic) */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <LayoutList className="w-3.5 h-3.5" /> Service Name (Arabic)
+            </label>
+            <input 
+              {...register('nameAr')}
+              placeholder="مثال: مساج سويدي"
+              className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          {/* Category */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Folder className="w-3.5 h-3.5" /> Catalog Category
@@ -79,9 +97,8 @@ export default function EditServiceModal({ open, onClose, service }) {
               {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-6">
+          {/* Service Type */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Type className="w-3.5 h-3.5" /> Operating Segment
@@ -95,7 +112,10 @@ export default function EditServiceModal({ open, onClose, service }) {
               <option value="MASSAGE">Massage</option>
             </select>
           </div>
+        </div>
 
+        <div className="grid grid-cols-2 gap-6">
+          {/* Duration */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                Standard Duration (Min)
@@ -106,9 +126,8 @@ export default function EditServiceModal({ open, onClose, service }) {
               className="w-full h-14 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-green/20 outline-none"
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-6">
+          {/* Price */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <DollarSign className="w-3.5 h-3.5" /> Base Price (EGP)
