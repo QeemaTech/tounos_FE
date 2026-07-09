@@ -196,6 +196,7 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
   const [scannerError, setScannerError] = useState('');
   const [simulatedData, setSimulatedData] = useState('');
   const [scanResult, setScanResult] = useState(null); // Member info after validate-qr
+  const [scanError, setScanError] = useState('');     // Error shown inside the scanner view
   const [errorMessage, setErrorMessage] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -254,18 +255,24 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
   };
 
   const handleValidateQR = async (qrData) => {
+    if (!qrData?.trim()) return;
     setIsVerifying(true);
+    setScanError('');
     setErrorMessage('');
     try {
       const res = await attendanceApi.validateQR(qrData);
       const data = res.data.data;
       if (!data.valid) {
-        setErrorMessage("Verification Failed: No active subscription or inactive member status.");
+        setErrorMessage('No active subscription or member is inactive.');
       }
       setScanResult(data);
     } catch (err) {
       console.error(err);
-      setErrorMessage(err.response?.data?.message || "Invalid or unauthorized QR code.");
+      // Show error inside the scanner area — scanResult stays null so scanner panel is visible
+      const msg = err.response?.data?.message
+        || err.response?.data?.error?.message
+        || 'Invalid or unauthorized QR code. Please try again.';
+      setScanError(msg);
     } finally {
       setIsVerifying(false);
     }
@@ -279,11 +286,15 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
         membershipNo: scanResult.member.membershipNo
       });
       await attendanceApi.qrCheckIn(qrDataStr);
-      toast.success("General Walk-in Check-in successful! Session deducted.");
+      toast.success('General Walk-in Check-in successful! Session deducted.');
       onSuccess();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Check-in confirmation failed.");
+      const msg = err.response?.data?.message
+        || err.response?.data?.error?.message
+        || 'Walk-in check-in failed. Please try again.';
+      toast.error(msg);
+      setErrorMessage(msg);
     } finally {
       setIsConfirming(false);
     }
@@ -293,11 +304,15 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
     setIsConfirming(true);
     try {
       await bookingsApi.update(booking.id, { status: 'COMPLETED' });
-      toast.success(`Check-in successful: Booking marked COMPLETED & attendance recorded!`);
+      toast.success('Check-in successful! Booking marked COMPLETED & attendance recorded.');
       onSuccess();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Booking check-in failed.");
+      const msg = err.response?.data?.message
+        || err.response?.data?.error?.message
+        || 'Booking check-in failed. Please try again.';
+      toast.error(msg);
+      setErrorMessage(msg);
     } finally {
       setIsConfirming(false);
     }
@@ -317,6 +332,24 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
 
         {/* 1. Showing Scanner Feed (Using class-based show/hide so scanner-view element remains in the DOM) */}
         <div className={!scanResult && !isVerifying ? "block space-y-4" : "hidden"}>
+
+          {/* Scan Error Banner */}
+          {scanError && (
+            <div className="flex gap-3 items-start p-4 bg-red-50 border border-red-200 rounded-2xl text-red-800">
+              <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex-1 text-sm">
+                <h4 className="font-bold mb-0.5">Scan Failed</h4>
+                <p className="text-red-700">{scanError}</p>
+              </div>
+              <button
+                onClick={() => { setScanError(''); setSimulatedData(''); }}
+                className="text-red-400 hover:text-red-600 transition-colors text-xs font-bold shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           <p className="text-sm text-slate-500 text-center">
             Position the member QR code within the scanner window to verify their attendance.
           </p>
