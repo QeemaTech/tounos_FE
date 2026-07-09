@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { toast } from 'react-hot-toast';
-import { attendanceApi } from '../../api/endpoints';
+import { attendanceApi, bookingsApi } from '../../api/endpoints';
 import PageHeader from '../../components/layout/PageHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -265,7 +265,7 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
       setScanResult(data);
     } catch (err) {
       console.error(err);
-      setErrorMessage(err.response?.data?.error?.message || "Invalid or unauthorized QR code.");
+      setErrorMessage(err.response?.data?.message || "Invalid or unauthorized QR code.");
     } finally {
       setIsVerifying(false);
     }
@@ -279,11 +279,25 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
         membershipNo: scanResult.member.membershipNo
       });
       await attendanceApi.qrCheckIn(qrDataStr);
-      toast.success("Check-in successful! Session deducted.");
+      toast.success("General Walk-in Check-in successful! Session deducted.");
       onSuccess();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.error?.message || "Check-in confirmation failed.");
+      toast.error(err.response?.data?.message || "Check-in confirmation failed.");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleConfirmBookingCheckIn = async (booking) => {
+    setIsConfirming(true);
+    try {
+      await bookingsApi.update(booking.id, { status: 'COMPLETED' });
+      toast.success(`Check-in successful: Booking marked COMPLETED & attendance recorded!`);
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Booking check-in failed.");
     } finally {
       setIsConfirming(false);
     }
@@ -403,6 +417,40 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
               )}
             </div>
 
+            {/* Today's Bookings */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Today's Bookings</h4>
+              {scanResult.bookings && scanResult.bookings.length > 0 ? (
+                <div className="space-y-2">
+                  {scanResult.bookings.map(b => (
+                    <div key={b.id} className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
+                      <div>
+                        <span className="block text-sm font-bold text-slate-800">
+                          {b.bookingType === 'GROUP_CLASS' ? b.schedule?.groupClass?.name : b.service?.name}
+                        </span>
+                        <span className="block text-xs text-slate-500 font-medium mt-1">
+                          {b.startTime} - {b.endTime} | <span className="font-bold text-brand-green">{b.bookingType.replace('_', ' ')}</span>
+                          {b.trainer && ` | Trainer: ${b.trainer.firstName}`}
+                          {b.therapist && ` | Therapist: ${b.therapist.firstName}`}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleConfirmBookingCheckIn(b)}
+                        disabled={isConfirming}
+                        className="px-4 py-2 bg-brand-green hover:bg-[#082a10] disabled:opacity-55 text-white text-xs font-bold rounded-xl transition-all shadow-sm"
+                      >
+                        Confirm Attendance
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-slate-500 text-xs italic bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4 text-center">
+                  No active bookings found for today.
+                </div>
+              )}
+            </div>
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-2">
               <button
@@ -419,9 +467,9 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
                 <button
                   onClick={handleConfirmCheckIn}
                   disabled={isConfirming}
-                  className="px-6 py-2.5 bg-brand-green hover:bg-[#082a10] disabled:opacity-55 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-green/20 text-sm"
+                  className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 disabled:opacity-55 text-white font-bold rounded-xl transition-all text-sm shadow-sm"
                 >
-                  {isConfirming ? 'Checking in...' : 'Confirm Check-in'}
+                  {isConfirming ? 'Checking in...' : 'Confirm General Walk-in'}
                 </button>
               )}
             </div>
