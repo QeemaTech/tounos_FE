@@ -295,30 +295,39 @@ export default function SpecialtyServicePage({
                           </td>
                           <td className="table-cell text-right !px-8">
                             <Dropdown
-                              trigger={<MoreHorizontal className="w-5 h-5 text-slate-400" />}
-                              items={[
-                                { label: 'Edit', icon: Edit2, onClick: () => openEdit(item) },
-                                {
-                                  label: item.isActive ? 'Deactivate' : 'Activate',
-                                  icon: Ban,
-                                  onClick: () => toggleMutation.mutate({ id: item.id, isActive: item.isActive }),
-                                },
-                                {
-                                  label: 'Delete',
-                                  icon: Trash2,
-                                  danger: true,
-                                  onClick: () => {
-                                    if (
-                                      confirm(
-                                        `Deactivate "${item.name}"? Members will no longer see this offering.`
-                                      )
-                                    ) {
-                                      deleteMutation.mutate(item.id);
-                                    }
-                                  },
-                                },
-                              ]}
-                            />
+                              trigger={
+                                <button className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600 cursor-pointer">
+                                  <MoreHorizontal className="w-5 h-5" />
+                                </button>
+                              }
+                            >
+                              <button
+                                onClick={() => openEdit(item)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                              >
+                                <Edit2 className="w-4 h-4" /> Edit
+                              </button>
+                              <button
+                                onClick={() => toggleMutation.mutate({ id: item.id, isActive: item.isActive })}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                              >
+                                <Ban className="w-4 h-4" /> {item.isActive ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      `Deactivate "${item.name}"? Members will no longer see this offering.`
+                                    )
+                                  ) {
+                                    deleteMutation.mutate(item.id);
+                                  }
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" /> Delete
+                              </button>
+                            </Dropdown>
                           </td>
                         </tr>
                       ))}
