@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Search, Calendar, GitBranch, ShieldCheck, UserCheck, 
-  Camera, X, Check, AlertTriangle, AlertCircle, RefreshCw
+import { useQuery } from '@tanstack/react-query';
+import {
+  Search, Calendar, GitBranch, UserCheck,
+  Camera, Check, AlertTriangle, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { toast } from 'react-hot-toast';
-import { attendanceApi, bookingsApi } from '../../api/endpoints';
+import { attendanceApi } from '../../api/endpoints';
 import PageHeader from '../../components/layout/PageHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -14,15 +14,13 @@ import Modal from '../../components/ui/Modal';
 import { useBranchScope } from '../../hooks/useBranchScope';
 
 export default function AttendancePage() {
-  const qc = useQueryClient();
   const { branchFilter, setBranchFilter, branches, isBranchLocked } = useBranchScope();
-  
+
   const [search, setSearch] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [page, setPage] = useState(1);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
 
-  // Fetch Attendance Log
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['attendance', { branchId: branchFilter, search, date, page }],
     queryFn: () => attendanceApi.list({
@@ -39,12 +37,12 @@ export default function AttendancePage() {
 
   return (
     <div className="px-4 py-6 md:p-8 space-y-6 md:space-y-8 bg-slate-50 min-h-screen font-inter">
-      <PageHeader 
-        title="Attendance & Check-in" 
-        subtitle="Manage member entry logs and verify attendance QR codes" 
+      <PageHeader
+        title="Attendance & Check-in"
+        subtitle="Manage member entry logs and verify attendance QR codes"
         breadcrumbs={[{ label: 'Attendance' }]}
         actions={
-          <button 
+          <button
             onClick={() => setIsScanModalOpen(true)}
             className="bg-brand-green hover:bg-[#082a10] text-white !rounded-2xl !py-2.5 !px-4 md:!py-3 md:!px-6 shadow-lg shadow-brand-green/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5 text-sm md:text-base"
           >
@@ -55,9 +53,7 @@ export default function AttendancePage() {
         }
       />
 
-      {/* Filters Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
-        {/* Search */}
         <div className="relative sm:col-span-2 md:col-span-1">
           <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
           <input
@@ -69,7 +65,6 @@ export default function AttendancePage() {
           />
         </div>
 
-        {/* Date Filter */}
         <div className="relative">
           <Calendar className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
           <input
@@ -80,7 +75,6 @@ export default function AttendancePage() {
           />
         </div>
 
-        {/* Branch Scope Dropdown */}
         <div className="relative">
           <GitBranch className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
           <select
@@ -97,7 +91,6 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* Logs Table/Cards */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-12"><LoadingSpinner /></div>
@@ -109,7 +102,6 @@ export default function AttendancePage() {
           </div>
         ) : (
           <>
-            {/* Desktop Table — hidden on small screens */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
@@ -153,11 +145,9 @@ export default function AttendancePage() {
               </table>
             </div>
 
-            {/* Mobile Cards — shown only on small screens */}
             <div className="md:hidden divide-y divide-slate-100">
               {logs.map(log => (
                 <div key={log.id} className="p-4 space-y-3 hover:bg-slate-50/40 transition-colors">
-                  {/* Top row: name + status */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-bold text-slate-900 text-sm leading-tight">
@@ -170,7 +160,6 @@ export default function AttendancePage() {
                     <StatusBadge status={log.status} />
                   </div>
 
-                  {/* Bottom row: branch + time + method */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
                       <GitBranch className="w-3.5 h-3.5 text-slate-400" />
@@ -192,7 +181,6 @@ export default function AttendancePage() {
           </>
         )}
 
-        {/* Pagination */}
         {meta && meta.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 md:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
             <span className="text-sm font-medium text-slate-500">
@@ -218,63 +206,51 @@ export default function AttendancePage() {
         )}
       </div>
 
-      {/* QR Scanner & Verification Modal */}
       {isScanModalOpen && (
-        <QRScannerModal 
-          isOpen={isScanModalOpen} 
-          onClose={() => setIsScanModalOpen(false)} 
-          onSuccess={() => {
-            setIsScanModalOpen(false);
-            refetch();
-          }}
+        <QRScannerModal
+          isOpen={isScanModalOpen}
+          onClose={() => setIsScanModalOpen(false)}
+          onCheckedIn={() => refetch()}
         />
       )}
     </div>
   );
 }
 
-function QRScannerModal({ isOpen, onClose, onSuccess }) {
+function QRScannerModal({ isOpen, onClose, onCheckedIn }) {
   const [scannerError, setScannerError] = useState('');
   const [simulatedData, setSimulatedData] = useState('');
-  const [scanResult, setScanResult] = useState(null); // Member info after validate-qr
-  const [scanError, setScanError] = useState('');     // Error shown inside the scanner view
+  const [scanResult, setScanResult] = useState(null);
+  const [lastQrData, setLastQrData] = useState('');
+  const [scanError, setScanError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successBanner, setSuccessBanner] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  
+  const [confirmingBookingId, setConfirmingBookingId] = useState(null);
+
   const scannerRef = useRef(null);
 
   useEffect(() => {
     let timer;
     if (isOpen && !scanResult) {
-      // Delay initialization slightly to guarantee the modal animation has finished and DOM element is attached
       timer = setTimeout(() => {
-        const element = document.getElementById("scanner-view");
-        if (!element) {
-          console.warn("Scanner element not found in DOM yet");
-          return;
-        }
+        const element = document.getElementById('scanner-view');
+        if (!element) return;
 
-        const html5QrCode = new Html5Qrcode("scanner-view");
+        const html5QrCode = new Html5Qrcode('scanner-view');
         scannerRef.current = html5QrCode;
 
         html5QrCode.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 }
-          },
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
           async (decodedText) => {
-            // Success
             await stopScanner();
             handleValidateQR(decodedText);
           },
-          (err) => {
-            // Silent scan frame failure
-          }
-        ).catch(err => {
-          console.error("Camera access failed", err);
-          setScannerError("Camera not found or permission denied. You can manually enter/paste the QR data below:");
+          () => {}
+        ).catch(() => {
+          setScannerError('Camera not found or permission denied. You can manually enter/paste the QR data below:');
         });
       }, 100);
     }
@@ -289,8 +265,8 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
     if (scannerRef.current && scannerRef.current.isScanning) {
       try {
         await scannerRef.current.stop();
-      } catch (err) {
-        console.error("Failed to stop scanner:", err);
+      } catch {
+        // ignore
       }
     }
   };
@@ -300,16 +276,16 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
     setIsVerifying(true);
     setScanError('');
     setErrorMessage('');
+    setSuccessBanner('');
+    setLastQrData(qrData.trim());
     try {
-      const res = await attendanceApi.validateQR(qrData);
+      const res = await attendanceApi.validateQR(qrData.trim());
       const data = res.data.data;
       if (!data.valid) {
         setErrorMessage('No active subscription or member is inactive.');
       }
       setScanResult(data);
     } catch (err) {
-      console.error(err);
-      // Show error inside the scanner area — scanResult stays null so scanner panel is visible
       const msg = err.response?.data?.message
         || err.response?.data?.error?.message
         || 'Invalid or unauthorized QR code. Please try again.';
@@ -319,39 +295,70 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
-  const handleConfirmCheckIn = async () => {
-    setIsConfirming(true);
+  const refreshMemberPreview = async () => {
+    if (!lastQrData) return;
     try {
-      const qrDataStr = JSON.stringify({
-        memberId: scanResult.member.id,
-        membershipNo: scanResult.member.membershipNo
-      });
-      await attendanceApi.qrCheckIn(qrDataStr);
-      toast.success('General Walk-in Check-in successful! Session deducted.');
-      onSuccess();
-    } catch (err) {
-      console.error(err);
-      const msg = err.response?.data?.message
-        || err.response?.data?.error?.message
-        || 'Walk-in check-in failed. Please try again.';
-      toast.error(msg);
-      setErrorMessage(msg);
-    } finally {
-      setIsConfirming(false);
+      const res = await attendanceApi.validateQR(lastQrData);
+      setScanResult(res.data.data);
+    } catch {
+      // keep current result
     }
   };
 
   const handleConfirmBookingCheckIn = async (booking) => {
     setIsConfirming(true);
+    setConfirmingBookingId(booking.id);
+    setErrorMessage('');
     try {
-      await bookingsApi.update(booking.id, { status: 'COMPLETED' });
-      toast.success('Check-in successful! Booking marked COMPLETED & attendance recorded.');
-      onSuccess();
+      const qrData =
+        lastQrData ||
+        JSON.stringify({
+          memberId: scanResult.member.id,
+          membershipNo: scanResult.member.membershipNo,
+        });
+      const res = await attendanceApi.qrCheckIn({ qrData, bookingId: booking.id });
+      const label =
+        res.data?.data?.booking?.serviceName ||
+        booking.service?.name ||
+        booking.schedule?.groupClass?.name ||
+        booking.bookingType;
+      toast.success(`Checked in: ${label} (${booking.startTime})`);
+      setSuccessBanner(`Checked in — ${label} · ${booking.startTime}-${booking.endTime}`);
+      await refreshMemberPreview();
+      onCheckedIn?.();
     } catch (err) {
-      console.error(err);
-      const msg = err.response?.data?.message
-        || err.response?.data?.error?.message
-        || 'Booking check-in failed. Please try again.';
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
+        'Booking check-in failed. Please try again.';
+      toast.error(msg);
+      setErrorMessage(msg);
+    } finally {
+      setIsConfirming(false);
+      setConfirmingBookingId(null);
+    }
+  };
+
+  const handleConfirmWalkIn = async () => {
+    setIsConfirming(true);
+    setErrorMessage('');
+    try {
+      const qrData =
+        lastQrData ||
+        JSON.stringify({
+          memberId: scanResult.member.id,
+          membershipNo: scanResult.member.membershipNo,
+        });
+      await attendanceApi.qrCheckIn({ qrData, walkIn: true });
+      toast.success('Walk-in check-in successful (1 gym session deducted)');
+      setSuccessBanner('Walk-in recorded — 1 group/gym session deducted');
+      await refreshMemberPreview();
+      onCheckedIn?.();
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
+        'Walk-in check-in failed. Please try again.';
       toast.error(msg);
       setErrorMessage(msg);
     } finally {
@@ -359,11 +366,16 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
+  const pendingBookings = (scanResult?.bookings || []).filter(
+    (b) => !b.checkedIn && ['CONFIRMED', 'PENDING'].includes(b.status)
+  );
+  const doneBookings = (scanResult?.bookings || []).filter(
+    (b) => b.checkedIn || b.status === 'COMPLETED'
+  );
+
   return (
     <Modal open={isOpen} onClose={onClose} title="QR Code Check-in" size="md">
       <div className="space-y-6 p-1">
-        
-        {/* Verification Loading State */}
         {isVerifying && (
           <div className="flex flex-col items-center justify-center p-8 gap-4">
             <RefreshCw className="w-10 h-10 text-brand-green animate-spin" />
@@ -371,10 +383,7 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* 1. Showing Scanner Feed (Using class-based show/hide so scanner-view element remains in the DOM) */}
-        <div className={!scanResult && !isVerifying ? "block space-y-4" : "hidden"}>
-
-          {/* Scan Error Banner */}
+        <div className={!scanResult && !isVerifying ? 'block space-y-4' : 'hidden'}>
           {scanError && (
             <div className="flex gap-3 items-start p-4 bg-red-50 border border-red-200 rounded-2xl text-red-800">
               <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
@@ -392,15 +401,16 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
           )}
 
           <p className="text-sm text-slate-500 text-center">
-            Position the QR code within the frame below to scan, or type the member's number manually.
+            Position the QR code within the frame, or type membership number manually.
           </p>
 
-          {/* Scanner box — fixed square using padding-bottom trick */}
-          <div className={`relative w-full overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 shadow-inner ${scannerError ? 'hidden' : 'block'}`} style={{ paddingBottom: '100%' }}>
+          <div
+            className={`relative w-full overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 shadow-inner ${scannerError ? 'hidden' : 'block'}`}
+            style={{ paddingBottom: '100%' }}
+          >
             <div id="scanner-view" className="absolute inset-0" />
           </div>
 
-          {/* Manual input */}
           <div className="space-y-3">
             {scannerError && (
               <div className="flex gap-2 items-start p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
@@ -411,7 +421,7 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Enter Membership No. (e.g. TC-001) or Member ID"
+                placeholder="Enter Membership No. or Member ID"
                 value={simulatedData}
                 onChange={(e) => setSimulatedData(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleValidateQR(simulatedData)}
@@ -428,128 +438,233 @@ function QRScannerModal({ isOpen, onClose, onSuccess }) {
           </div>
         </div>
 
-        {/* 2. Showing Member Profile & Subscription Preview */}
         {scanResult && !isVerifying && (
-          <div className="space-y-6">
-            
-            {/* Error Message if Validation Denies entry */}
+          <div className="space-y-5">
             {errorMessage && (
               <div className="flex gap-2 items-start p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
                 <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
                 <div className="text-sm">
-                  <h4 className="font-bold">Access Denied</h4>
+                  <h4 className="font-bold">Action failed</h4>
                   <p>{errorMessage}</p>
                 </div>
               </div>
             )}
 
-            {/* Verification Success Details */}
-            {!errorMessage && (
+            {successBanner && (
               <div className="flex gap-2 items-start p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
                 <Check className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5 bg-emerald-100 rounded-full p-0.5" />
                 <div className="text-sm">
-                  <h4 className="font-bold">Verification Successful</h4>
-                  <p>Membership is active and subscription was found.</p>
+                  <h4 className="font-bold">Checked in</h4>
+                  <p>{successBanner}</p>
+                  <p className="text-emerald-700/80 text-xs mt-1">
+                    Modal stays open so you can check in another booking for the same member.
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* Profile Card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+            {!errorMessage && !successBanner && scanResult.valid && (
+              <div className="flex gap-2 items-start p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+                <Check className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5 bg-emerald-100 rounded-full p-0.5" />
+                <div className="text-sm">
+                  <h4 className="font-bold">Member verified</h4>
+                  <p>
+                    {scanResult.requiresBookingSelection
+                      ? 'Select which booking to check in.'
+                      : 'Membership is active.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-900">
                     {scanResult.member.firstName} {scanResult.member.lastName}
                   </h3>
-                  <p className="text-xs text-slate-500 font-mono">Member ID: {scanResult.member.membershipNo}</p>
+                  <p className="text-xs text-slate-500 font-mono">
+                    {scanResult.member.membershipNo}
+                  </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  scanResult.valid ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {scanResult.valid ? 'ACTIVE MEMBER' : 'INACTIVE'}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    scanResult.valid ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {scanResult.valid ? 'ACTIVE' : 'INACTIVE'}
                 </span>
               </div>
 
               {scanResult.subscription ? (
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span className="block text-slate-400 text-xs font-semibold uppercase">Current Package</span>
-                    <span className="font-bold text-slate-800">{scanResult.subscription.packageName}</span>
+                    <span className="block text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                      Package
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      {scanResult.subscription.packageName}
+                    </span>
                   </div>
                   <div>
-                    <span className="block text-slate-400 text-xs font-semibold uppercase">Expiration Date</span>
+                    <span className="block text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                      Expires
+                    </span>
                     <span className="font-bold text-slate-800">
                       {new Date(scanResult.subscription.endDate).toLocaleDateString()}
                     </span>
                   </div>
+                  <div className="col-span-2 flex flex-wrap gap-2 pt-1">
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">
+                      Classes {scanResult.subscription.groupClassRemaining ?? '—'}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">
+                      PT {scanResult.subscription.privateTrainingRemaining ?? '—'}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">
+                      Massage {scanResult.subscription.massageRemaining ?? '—'}
+                    </span>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-2 text-slate-500 italic text-sm">
-                  No active package found.
-                </div>
+                <p className="text-center text-slate-500 italic text-sm">No active package found.</p>
               )}
             </div>
 
-            {/* Today's Bookings */}
             <div className="space-y-3">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Today's Bookings</h4>
-              {scanResult.bookings && scanResult.bookings.length > 0 ? (
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  Today&apos;s bookings
+                </h4>
+                {pendingBookings.length > 1 && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
+                    Pick a session
+                  </span>
+                )}
+              </div>
+
+              {pendingBookings.length > 0 ? (
                 <div className="space-y-2">
-                  {scanResult.bookings.map(b => (
-                    <div key={b.id} className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
-                      <div>
-                        <span className="block text-sm font-bold text-slate-800">
-                          {b.bookingType === 'GROUP_CLASS' ? b.schedule?.groupClass?.name : b.service?.name}
-                        </span>
-                        <span className="block text-xs text-slate-500 font-medium mt-1">
-                          {b.startTime} - {b.endTime} | <span className="font-bold text-brand-green">{b.bookingType.replace('_', ' ')}</span>
-                          {b.trainer && ` | Trainer: ${b.trainer.firstName}`}
-                          {b.therapist && ` | Therapist: ${b.therapist.firstName}`}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleConfirmBookingCheckIn(b)}
-                        disabled={isConfirming}
-                        className="px-4 py-2 bg-brand-green hover:bg-[#082a10] disabled:opacity-55 text-white text-xs font-bold rounded-xl transition-all shadow-sm"
+                  {pendingBookings.map((b) => {
+                    const isSuggested = scanResult.suggestedBookingId === b.id;
+                    const title =
+                      b.bookingType === 'GROUP_CLASS'
+                        ? b.schedule?.groupClass?.name
+                        : b.service?.name;
+                    return (
+                      <div
+                        key={b.id}
+                        className={`p-4 rounded-2xl flex items-center justify-between gap-3 shadow-sm border ${
+                          isSuggested
+                            ? 'bg-brand-green/5 border-brand-green/40 ring-1 ring-brand-green/20'
+                            : 'bg-white border-slate-200'
+                        }`}
                       >
-                        Confirm Attendance
-                      </button>
-                    </div>
-                  ))}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="block text-sm font-bold text-slate-800 truncate">
+                              {title || b.bookingType.replace('_', ' ')}
+                            </span>
+                            {isSuggested && (
+                              <span className="text-[9px] font-black uppercase tracking-widest bg-brand-green text-white px-2 py-0.5 rounded-full">
+                                Suggested
+                              </span>
+                            )}
+                          </div>
+                          <span className="block text-xs text-slate-500 font-medium mt-1">
+                            {b.startTime} – {b.endTime} ·{' '}
+                            <span className="font-bold text-brand-green">
+                              {b.bookingType.replaceAll('_', ' ')}
+                            </span>
+                            {b.trainer && ` · ${b.trainer.firstName}`}
+                            {b.therapist && ` · ${b.therapist.firstName}`}
+                          </span>
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            Quota already used when booked — check-in marks attendance only
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleConfirmBookingCheckIn(b)}
+                          disabled={isConfirming || !scanResult.valid}
+                          className={`shrink-0 px-4 py-2.5 disabled:opacity-55 text-white text-xs font-bold rounded-xl transition-all shadow-sm ${
+                            isSuggested
+                              ? 'bg-brand-green hover:bg-[#082a10]'
+                              : 'bg-slate-800 hover:bg-slate-900'
+                          }`}
+                        >
+                          {confirmingBookingId === b.id ? 'Checking in...' : 'Check in'}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-slate-500 text-xs italic bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4 text-center">
-                  No active bookings found for today.
+                  No pending bookings left for today.
+                </div>
+              )}
+
+              {doneBookings.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Already checked in
+                  </h5>
+                  {doneBookings.map((b) => (
+                    <div
+                      key={b.id}
+                      className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between opacity-80"
+                    >
+                      <div>
+                        <span className="text-sm font-bold text-slate-600">
+                          {b.service?.name ||
+                            b.schedule?.groupClass?.name ||
+                            b.bookingType.replaceAll('_', ' ')}
+                        </span>
+                        <span className="block text-xs text-slate-400">
+                          {b.startTime} – {b.endTime}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg">
+                        Done
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex flex-wrap justify-end gap-3 pt-1">
               <button
                 onClick={() => {
                   setScanResult(null);
                   setErrorMessage('');
+                  setSuccessBanner('');
+                  setLastQrData('');
                 }}
                 className="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
               >
                 Scan Another
               </button>
-              
-              {!errorMessage && (
+
+              {scanResult.valid && scanResult.canWalkIn && (
                 <button
-                  onClick={handleConfirmCheckIn}
+                  onClick={handleConfirmWalkIn}
                   disabled={isConfirming}
                   className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 disabled:opacity-55 text-white font-bold rounded-xl transition-all text-sm shadow-sm"
                 >
-                  {isConfirming ? 'Checking in...' : 'Confirm General Walk-in'}
+                  {isConfirming && !confirmingBookingId ? 'Checking in...' : 'Walk-in (deduct gym session)'}
                 </button>
               )}
-            </div>
 
+              <button
+                onClick={onClose}
+                className="px-5 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
-
       </div>
     </Modal>
   );
