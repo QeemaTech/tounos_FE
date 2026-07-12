@@ -76,23 +76,17 @@ export default function DashboardPage() {
           title="Today's Revenue"
           value={`EGP ${Number(stats.todayRevenue).toLocaleString()}`}
           icon={Wallet}
-          change="+12.5%"
-          trend="up"
           featured
         />
         <StatCard
           title="New Members"
           value={stats.newMembersToday}
           icon={Users}
-          change="+4.2%"
-          trend="up"
         />
         <StatCard
           title="Total Bookings"
           value={stats.bookingsToday}
           icon={CalendarDays}
-          change="-1.5%"
-          trend="down"
         />
         <StatCard
           title="Active Check-ins"

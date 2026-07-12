@@ -4,7 +4,7 @@ import {
   Dumbbell, GraduationCap, Heart, Package, 
   ShoppingCart, Tag, ListOrdered, Snowflake, 
   MessageSquare, BarChart3, Settings, GitBranch, X,
-  LayoutList, Layers, Calendar, ShieldCheck
+  LayoutList, Layers, Calendar, ShieldCheck, ScrollText
 } from 'lucide-react';
 import PermissionGuard from '../ui/PermissionGuard';
 
@@ -17,46 +17,49 @@ const NAV_GROUPS = [
   {
     title: 'Management',
     items: [
-      { path: '/members', icon: Users, label: 'Members' },
-      { path: '/bookings', icon: CalendarDays, label: 'Bookings' },
-      { path: '/subscriptions', icon: ClipboardList, label: 'Subscriptions' },
-      { path: '/payments', icon: Wallet, label: 'Payments' },
-      { path: '/attendance', icon: UserCheck, label: 'Attendance' },
+      { path: '/members', icon: Users, label: 'Members', permission: 'members.read' },
+      { path: '/bookings', icon: CalendarDays, label: 'Bookings', permission: 'bookings.read' },
+      { path: '/subscriptions', icon: ClipboardList, label: 'Subscriptions', permission: 'subscriptions.read' },
+      { path: '/payments', icon: Wallet, label: 'Payments', permission: 'payments.read' },
+      { path: '/attendance', icon: UserCheck, label: 'Attendance', permission: 'attendance.read' },
     ]
   },
   {
     title: 'Services',
     items: [
-      { path: '/categories', icon: LayoutList, label: 'Categories' },
-      { path: '/services', icon: ListOrdered, label: 'Services Catalog' },
-      { path: '/classes', icon: Calendar, label: 'Classes' },
-      { path: '/trainers', icon: GraduationCap, label: 'Trainers' },
-      { path: '/therapists', icon: Heart, label: 'Therapists' },
-      { path: '/packages', icon: Package, label: 'Packages' },
+      { path: '/categories', icon: LayoutList, label: 'Categories', permission: 'services.read' },
+      { path: '/services', icon: ListOrdered, label: 'Services Catalog', permission: 'services.read' },
+      { path: '/classes', icon: Calendar, label: 'Classes', permission: 'classes.read' },
+      { path: '/trainers', icon: GraduationCap, label: 'Trainers', permission: 'trainers.read' },
+      { path: '/therapists', icon: Heart, label: 'Therapists', permission: 'therapists.read' },
+      { path: '/massage', icon: Heart, label: 'Massage', permission: 'services.read' },
+      { path: '/private-training', icon: Dumbbell, label: 'Private Training', permission: 'services.read' },
+      { path: '/packages', icon: Package, label: 'Packages', permission: 'packages.read' },
     ]
   },
   {
     title: 'Operations',
     items: [
-      { path: '/products', icon: ShoppingCart, label: 'Inventory' },
-      { path: '/promo-codes', icon: Tag, label: 'Offers' },
-      { path: '/orders', icon: ListOrdered, label: 'Orders' },
-      { path: '/freezes', icon: Snowflake, label: 'Freezes' },
+      { path: '/products', icon: ShoppingCart, label: 'Inventory', permission: 'products.read' },
+      { path: '/promo-codes', icon: Tag, label: 'Offers', permission: 'promos.read' },
+      { path: '/orders', icon: ListOrdered, label: 'Orders', permission: 'orders.read' },
+      { path: '/freezes', icon: Snowflake, label: 'Freezes', permission: 'subscriptions.read' },
     ]
   },
   {
     title: 'Business',
     items: [
-      { path: '/support', icon: MessageSquare, label: 'Support' },
-      { path: '/reports', icon: BarChart3, label: 'Analytics' },
+      { path: '/support', icon: MessageSquare, label: 'Support', permission: 'support.read' },
+      { path: '/reports', icon: BarChart3, label: 'Analytics', permission: 'reports.read' },
     ]
   },
   {
     title: 'Configuration',
     items: [
-      { path: '/branches', icon: GitBranch, label: 'Branches', permission: 'super_admin' },
-      { path: '/admins', icon: ShieldCheck, label: 'Admin Users', permission: 'super_admin' },
-      { path: '/settings', icon: Settings, label: 'Settings' },
+      { path: '/branches', icon: GitBranch, label: 'Branches', superAdminOnly: true },
+      { path: '/admins', icon: ShieldCheck, label: 'Admin Users', superAdminOnly: true },
+      { path: '/audit-logs', icon: ScrollText, label: 'Audit Logs', permission: 'audit_logs.read' },
+      { path: '/settings', icon: Settings, label: 'Settings', permission: 'settings.read' },
     ]
   }
 ];
@@ -97,8 +100,12 @@ export default function Sidebar({ open, onClose }) {
               )}
               <div className="space-y-1">
                 {group.items.map((item) => (
-                  item.permission === 'super_admin' ? (
-                    <PermissionGuard key={item.path} requireAdmin>
+                  item.superAdminOnly ? (
+                    <PermissionGuard key={item.path} superAdminOnly>
+                      <SidebarLink item={item} isActive={location.pathname === item.path} onClick={onClose} />
+                    </PermissionGuard>
+                  ) : item.permission ? (
+                    <PermissionGuard key={item.path} permission={item.permission}>
                       <SidebarLink item={item} isActive={location.pathname === item.path} onClick={onClose} />
                     </PermissionGuard>
                   ) : (

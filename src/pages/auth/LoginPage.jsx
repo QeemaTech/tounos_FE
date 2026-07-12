@@ -122,7 +122,7 @@ export default function LoginPage() {
             </form>
 
             <p className="text-center text-xs text-gray-400 mt-6">
-              super@tonusclub.com / SuperAdmin@123
+              Tonus Club Admin Portal
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import AdminLayout from './layouts/AdminLayout';
 import { Toaster } from 'react-hot-toast';
+import PermissionGuard from './components/ui/PermissionGuard';
 
 
 import LoginPage from './pages/auth/LoginPage';
@@ -32,6 +33,9 @@ import TrainerProfilePage from './pages/trainers/TrainerProfilePage';
 import TherapistProfilePage from './pages/therapists/TherapistProfilePage';
 import AdminsPage from './pages/admins/AdminsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
+import AuditLogsPage from './pages/audit-logs/AuditLogsPage';
+import MassagePage from './pages/massage/MassagePage';
+import PrivateTrainingPage from './pages/private-training/PrivateTrainingPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +60,14 @@ function SuperAdminGuard({ children }) {
   const { isSuperAdmin } = useAuth();
   if (!isSuperAdmin) return <Navigate to="/" replace />;
   return children;
+}
+
+function PermissionRoute({ permission, children }) {
+  return (
+    <PermissionGuard permission={permission} fallback={<Navigate to="/" replace />}>
+      {children}
+    </PermissionGuard>
+  );
 }
 
 export default function App() {
@@ -89,6 +101,8 @@ export default function App() {
               <Route path="trainers/:trainerId" element={<TrainerProfilePage />} />
               <Route path="therapists" element={<TherapistsPage />} />
               <Route path="therapists/:therapistId" element={<TherapistProfilePage />} />
+              <Route path="massage" element={<PermissionRoute permission="services.read"><MassagePage /></PermissionRoute>} />
+              <Route path="private-training" element={<PermissionRoute permission="services.read"><PrivateTrainingPage /></PermissionRoute>} />
               <Route path="packages" element={<PackagesPage />} />
 
               {/* Commerce */}
@@ -101,7 +115,8 @@ export default function App() {
               <Route path="support" element={<SupportTicketsPage />} />
               <Route path="support/:ticketId" element={<TicketChatPage />} />
               <Route path="branches" element={<SuperAdminGuard><BranchesPage /></SuperAdminGuard>} />
-              <Route path="admins" element={<AdminsPage />} />
+              <Route path="admins" element={<SuperAdminGuard><AdminsPage /></SuperAdminGuard>} />
+              <Route path="audit-logs" element={<AuditLogsPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

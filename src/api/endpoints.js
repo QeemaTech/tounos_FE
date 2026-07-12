@@ -89,11 +89,16 @@ export const ordersApi = {
 /* ── Products ── */
 export const productsApi = {
   ...createCrudApi('products'),
-  updateStock: (branchId, data) => client.put(`/admin/products/branch/${branchId}`, data),
+  updateStock: (productId, branchId, stock) =>
+    client.patch(`/admin/products/${productId}/branches/${branchId}/stock`, { stock }),
 };
 
 /* ── Promo Codes ── */
-export const promoCodesApi = createCrudApi('promo-codes');
+export const promoCodesApi = {
+  ...createCrudApi('promo-codes'),
+  remove: (id) => client.post(`/admin/promo-codes/${id}/deactivate`),
+  deactivate: (id) => client.post(`/admin/promo-codes/${id}/deactivate`),
+};
 
 /* ── Subscription Freezes ── */
 export const freezesApi = {
@@ -101,7 +106,7 @@ export const freezesApi = {
   create: (data) => client.post('/admin/subscription-freezes', data),
   approve: (id) => client.put(`/admin/subscription-freezes/${id}/approve`),
   reject:  (id) => client.put(`/admin/subscription-freezes/${id}/reject`),
-  cancel: (id) => client.post(`/admin/subscription-freezes/${id}/cancel`),
+  cancel: (id) => client.delete(`/admin/subscription-freezes/${id}`),
 };
 
 /* ── Support Tickets ── */
@@ -110,7 +115,8 @@ export const supportApi = {
   getById:      (id)     => client.get(`/admin/support/${id}`),
   reply:        (id, message) => client.post(`/admin/support/${id}/reply`, { message }),
   updateStatus: (id, status)  => client.patch(`/admin/support/${id}/status`, { status }),
-  updatePriority: (id, priority) => client.patch(`/admin/support/${id}/status`, { priority }),
+  updatePriority: (id, priority) =>
+    client.patch(`/admin/support/${id}/status`, { priority }),
 };
 
 /* ── Notifications ── */
@@ -145,6 +151,36 @@ export const settingsApi = {
   get:        (params) => client.get('/admin/settings', { params }),
   upsert:     (data)   => client.post('/admin/settings', data),
   bulkUpdate: (settings) => client.put('/admin/settings/bulk', { settings }),
+};
+
+/* ── Massage offerings + sessions ── */
+export const massageApi = {
+  list: (params) => client.get('/admin/massages', { params }),
+  getById: (id) => client.get(`/admin/massages/${id}`),
+  create: (data) => client.post('/admin/massages', data),
+  update: (id, data) => client.patch(`/admin/massages/${id}`, data),
+  remove: (id) => client.delete(`/admin/massages/${id}`),
+  listSessions: (params) => client.get('/admin/massages/sessions', { params }),
+  getSession: (id) => client.get(`/admin/massages/sessions/${id}`),
+  createSession: (data) => client.post('/admin/massages/sessions', data),
+  updateSession: (id, data) => client.patch(`/admin/massages/sessions/${id}`, data),
+  cancelSession: (id, reason) =>
+    client.post(`/admin/massages/sessions/${id}/cancel`, { reason }),
+};
+
+/* ── Private Training offerings + sessions ── */
+export const privateTrainingApi = {
+  list: (params) => client.get('/admin/private-training', { params }),
+  getById: (id) => client.get(`/admin/private-training/${id}`),
+  create: (data) => client.post('/admin/private-training', data),
+  update: (id, data) => client.patch(`/admin/private-training/${id}`, data),
+  remove: (id) => client.delete(`/admin/private-training/${id}`),
+  listSessions: (params) => client.get('/admin/private-training/sessions', { params }),
+  getSession: (id) => client.get(`/admin/private-training/sessions/${id}`),
+  createSession: (data) => client.post('/admin/private-training/sessions', data),
+  updateSession: (id, data) => client.patch(`/admin/private-training/sessions/${id}`, data),
+  cancelSession: (id, reason) =>
+    client.post(`/admin/private-training/sessions/${id}/cancel`, { reason }),
 };
 
 /* ── Audit Logs ── */

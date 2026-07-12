@@ -49,7 +49,6 @@ export default function AuditLogsPage() {
       title="Audit Logs"
       queryKey="audit-logs"
       apiList={auditLogsApi.list}
-      apiGetById={auditLogsApi.getById}
       columns={columns}
       detailSections={detailSections}
       breadcrumbs={[{ label: 'Audit Logs' }]}

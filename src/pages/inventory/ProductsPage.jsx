@@ -22,7 +22,7 @@ export default function ProductsPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['products', { search }],
-    queryFn: () => productsApi.list({ query: { search } }).then(r => r.data),
+    queryFn: () => productsApi.list({ search: search || undefined }).then(r => r.data),
   });
 
   const toggleStatusMutation = useMutation({

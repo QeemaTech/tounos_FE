@@ -58,8 +58,6 @@ export function useBranchScope(options = {}) {
     isBranchLocked,
   };
 
-  console.log('[useBranchScope Debug]', result);
-
   return result;
 }
 
