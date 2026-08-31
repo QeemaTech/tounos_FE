@@ -13,6 +13,7 @@ import {
   ShieldAlert,
   ArrowRight
 } from 'lucide-react';
+import QeemaCopyrightBadge from '../../components/common/QeemaCopyrightBadge';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -252,8 +253,9 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <div className="text-center mt-8 text-xs text-slate-400 font-medium">
-            <span>© {new Date().getFullYear()} Tonus Club. Powered by Antigravity Core.</span>
+          <div className="text-center mt-8 text-xs text-slate-400 font-medium flex flex-col items-center gap-3">
+            <QeemaCopyrightBadge />
+            <span>© {new Date().getFullYear()} Tonus Club. جميع الحقوق محفوظة.</span>
           </div>
 
         </div>

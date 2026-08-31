@@ -7,6 +7,7 @@ import {
   LayoutList, Layers, Calendar, ShieldCheck, ScrollText
 } from 'lucide-react';
 import PermissionGuard from '../ui/PermissionGuard';
+import QeemaCopyrightBadge from '../common/QeemaCopyrightBadge';
 
 const NAV_GROUPS = [
   {
@@ -118,7 +119,8 @@ export default function Sidebar({ open, onClose }) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 px-6 border-t border-white/5 bg-black/20">
+        <div className="p-4 px-6 border-t border-white/5 bg-black/20 flex flex-col items-center gap-3">
+          <QeemaCopyrightBadge variant="dark" className="scale-95" />
           <div className="flex items-center justify-center gap-2 opacity-40">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
             <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Stable v2.4.0</p>
