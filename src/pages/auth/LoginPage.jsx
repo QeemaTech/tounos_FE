@@ -254,8 +254,8 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center mt-8 text-xs text-slate-400 font-medium flex flex-col items-center gap-3">
-            <QeemaCopyrightBadge />
-            <span>© {new Date().getFullYear()} Tonus Club. جميع الحقوق محفوظة.</span>
+            <QeemaCopyrightBadge lang="en" />
+            <span>© {new Date().getFullYear()} Tonus Club. All rights reserved.</span>
           </div>
 
         </div>

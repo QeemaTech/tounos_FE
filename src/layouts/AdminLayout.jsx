@@ -17,9 +17,9 @@ export default function AdminLayout() {
         <main className="flex-1 p-6 lg:p-8">
           <Outlet />
         </main>
-        <footer className="py-4 px-6 lg:px-8 border-t border-slate-200/60 bg-white/50 backdrop-blur-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <span>© {new Date().getFullYear()} Tonus Club. جميع الحقوق محفوظة.</span>
-          <QeemaCopyrightBadge variant="light" />
+        <footer className="py-4 px-6 lg:px-8 border-t border-slate-200/80 bg-white/70 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-medium">
+          <span>© {new Date().getFullYear()} Tonus Club. All rights reserved.</span>
+          <QeemaCopyrightBadge variant="light" lang="en" />
         </footer>
       </div>
 
