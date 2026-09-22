@@ -1,36 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Layers, BookOpenCheck, Users, Sparkles, Dumbbell, Calendar, 
-  Info, ChevronDown, ChevronUp, Languages, ArrowRight, CheckCircle2, 
-  Lightbulb, ExternalLink 
+  Compass, 
+  Layers, 
+  BookOpenCheck, 
+  Calendar, 
+  Sparkles, 
+  Dumbbell, 
+  ArrowRight, 
+  ArrowLeft,
+  ChevronDown, 
+  ChevronUp, 
+  Languages, 
+  CheckCircle2, 
+  Lightbulb, 
+  AlertCircle,
+  HelpCircle,
+  Eye,
+  GitFork
 } from 'lucide-react';
 
 export default function CatalogHierarchyGuide({ currentPage = '' }) {
   const navigate = useNavigate();
 
+  // Collapsed state
   const [collapsed, setCollapsed] = useState(() => {
     try {
-      return localStorage.getItem('tounos_catalog_guide_collapsed') === 'true';
+      return localStorage.getItem('tounos_guide_collapsed') === 'true';
     } catch {
       return false;
     }
   });
 
+  // Language state
   const [lang, setLang] = useState(() => {
     try {
-      return localStorage.getItem('tounos_catalog_guide_lang') || 'ar';
+      return localStorage.getItem('tounos_guide_lang') || 'ar';
     } catch {
       return 'ar';
     }
   });
 
+  // Mode: 'focused' (شرح الصفحة الحالية فقط) or 'pipeline' (خريطة الخطوات الكاملة)
+  const [viewMode, setViewMode] = useState('focused');
+
   const toggleCollapsed = () => {
     setCollapsed(prev => {
       const next = !prev;
-      try {
-        localStorage.setItem('tounos_catalog_guide_collapsed', String(next));
-      } catch {}
+      try { localStorage.setItem('tounos_guide_collapsed', String(next)); } catch {}
       return next;
     });
   };
@@ -38,324 +55,310 @@ export default function CatalogHierarchyGuide({ currentPage = '' }) {
   const toggleLang = () => {
     setLang(prev => {
       const next = prev === 'ar' ? 'en' : 'ar';
-      try {
-        localStorage.setItem('tounos_catalog_guide_lang', next);
-      } catch {}
+      try { localStorage.setItem('tounos_guide_lang', next); } catch {}
       return next;
     });
   };
 
-  const domains = [
-    {
-      id: 'categories',
-      path: '/categories',
+  // بيانات كل صفحة بأسلوب بسيط جداً وسهل الفهم
+  const pageGuides = {
+    categories: {
+      titleAr: 'أنت في: تصنيفات الخدمات (الأقسام الرئيسية)',
+      titleEn: 'You are in: Service Categories (Master Sections)',
       icon: Layers,
-      stepNum: '01',
-      badgeAr: 'المظلة الكبيرة',
-      badgeEn: 'Umbrella Grouping',
-      titleAr: 'تصنيفات الخدمات',
-      titleEn: 'Service Categories',
-      roleAr: 'المظلة الرئيسية التي تجمع الخدمات',
-      roleEn: 'Top-level grouping umbrella for club services',
-      descAr: 'المظلة الكبيرة اللي بتجمع الخدمات (مثل: الحصص الجماعية، التدريب الخاص، المساج والاستشفاء). فايدتها: تنظيم الكتالوج، وإعطاء شكل وأيقونة وتنسيق لكل قسم في تطبيق المشتركات والداشبورد.',
-      descEn: 'The master umbrella grouping all offerings (e.g. Group Classes, Private Training, Massage & Wellness). Organizes the catalog and provides category icons & mobile layouts.',
-      exampleAr: 'أمثلة: "الحصص الجماعية"، "التدريب الخاص"، "المساج والاستشفاء"',
-      exampleEn: 'Examples: "Group Classes", "Private Training", "Wellness & Massage"',
-      actionHintAr: 'ابدأ من هنا لإضافة الأقسام وأيقوناتها الرياضية.',
-      actionHintEn: 'Create master categories and select their sports icons first.'
+      color: 'blue',
+      whatAr: 'هنا بتعمل الأقسام الكبيرة اللي بتجمع خدمات النادي (زي: كلاسات جماعية، مساج، تدريب خاص)، وتختار لكل قسم الأيقونة اللي هتظهر للمشتركات في التطبيق.',
+      whatEn: 'Create the top-level sections grouping your offerings (e.g. Group Classes, Spa, PT) and choose their app icons.',
+      nextStepAr: 'بعد ما تنشئ القسم ⬅️ ادخل على "كتالوج الخدمات" عشان تضيف أسماء الحصص وأسعارها.',
+      nextStepEn: 'Next step ⬅️ Go to "Services Catalog" to add individual service names and prices.',
+      nextPath: '/services',
+      tipAr: 'التصنيف وظيفته تنظيم شكل التطبيق للمشتركات وتسهيل التصفح.',
+      tipEn: 'Categories organize the mobile app experience and make browsing intuitive.'
     },
-    {
-      id: 'services',
-      path: '/services',
+    services: {
+      titleAr: 'أنت في: كتالوج الخدمات (الاسم والسعر والمدة)',
+      titleEn: 'You are in: Services Catalog (Name, Price & Duration)',
       icon: BookOpenCheck,
-      stepNum: '02',
-      badgeAr: 'القاموس المرجعي',
-      badgeEn: 'Base Dictionary',
-      titleAr: 'كتالوج الخدمات',
-      titleEn: 'Services Catalog',
-      roleAr: 'القاموس المرجعي لكل نشاط وخدمة',
-      roleEn: 'Central reference dictionary for all offerings',
-      descAr: 'هنا بتعرّف الخدمة مجردة: (اسمها، مدتها بالدقائق، سعرها الفردي، ونوعها الفني serviceType: كلاس جماعي GROUP_CLASS أو تدريب خاص PRIVATE_TRAINING أو مساج MASSAGE)، وتحديد الفروع المتاحة.',
-      descEn: 'Defines the raw service: name, standard duration (mins), base price, and technical serviceType (GROUP_CLASS, PRIVATE_TRAINING, or MASSAGE), plus branch availability.',
-      exampleAr: 'مثال: خدمة "Power Yoga" مدتها 60 دقيقة، سعرها 250 ج، نوعها GROUP_CLASS.',
-      exampleEn: 'Example: "Power Yoga" - 60 mins, EGP 250, type GROUP_CLASS.',
-      actionHintAr: 'كل كلاس أو جلسة مساج أو تدريب خاص يجب أن تبدأ من هنا أولاً.',
-      actionHintEn: 'Every class, massage, or private session must originate here first.'
+      color: 'emerald',
+      whatAr: 'هنا بتسجل بيانات أي خدمة جديدة يقدمها النادي: (اسمها، مدتها بالدقائق، وسعرها الفردي)، وبتحدد نوعها: كلاس جماعي أو مساج أو تدريب خاص.',
+      whatEn: 'Register raw service offerings: name, duration in mins, price, and technical type (Class, Massage, or Private Training).',
+      nextStepAr: 'لو نوعها كلاس جماعي ⬅️ توجه لـ "الكلاسات" لعمل جدول المواعيد الأسبوعي. لو مساج أو تدريب خاص ⬅️ ستكون جاهزة للحجز في شاشاتها مباشرة.',
+      nextStepEn: 'If it is a Group Class ⬅️ Go to "Classes" to set weekly schedules. If Massage or PT, it is immediately bookable.',
+      nextPath: '/classes',
+      tipAr: 'مش محتاج تربط الخدمة بالفروع يدوي، النظام بيربطها تلقائياً بكل الفروع.',
+      tipEn: 'No need to link branches manually; new services auto-link to all active branches.'
     },
-    {
-      id: 'classes',
-      path: '/classes',
-      icon: Users,
-      stepNum: '03',
-      badgeAr: 'التشغيل الجماعي',
-      badgeEn: 'Group Operations',
-      titleAr: 'الكلاسات وجداولها',
-      titleEn: 'Classes & Schedules',
-      roleAr: 'تحويل الخدمة لحصة فعلية في الصالة مع جدولها',
-      roleEn: 'Binds GROUP_CLASS to physical hall sessions & schedules',
-      descAr: 'بتاخد أي خدمة نوعها GROUP_CLASS وتحولها لحصة جماعية فعلية في الصالة. بتحدد: سعة الصالة القصوى (Capacity مثلاً 20 مشتركة) ومستوى الحصة. وبداخلها يُبنى الجدول الأسبوعي (Schedules) ومواعيد الأيام بالساعة.',
-      descEn: 'Converts any GROUP_CLASS service into an active hall session with max capacity (e.g. 20 members) and skill level. Houses weekly recurring schedule slots with trainers & branches.',
-      exampleAr: 'مثال: كلاس الـ Yoga يوم الإثنين والأربعاء الساعة 5:00 مساءً في فرع الشيخ زايد.',
-      exampleEn: 'Example: Yoga Class on Mon & Wed at 5:00 PM in Sheikh Zayed branch.',
-      actionHintAr: 'قاعدة هامة: كل كلاس يرتبط بخدمة واحدة فقط من الكتالوج (1-to-1).',
-      actionHintEn: 'Key rule: Each Class uniquely maps to one Catalog Service (1-to-1).'
+    classes: {
+      titleAr: 'أنت في: الكلاسات وجداولها (التشغيل والمواعيد)',
+      titleEn: 'You are in: Classes & Weekly Schedules (Hall Operations)',
+      icon: Calendar,
+      color: 'purple',
+      whatAr: 'هنا بتاخد الخدمة اللي سجلتها في الكتالوج، وتحط لها: سعة الصالة (كام مشتركة)، والجدول الأسبوعي (يوم إيه والساعة كام والمدربة مين في كل فرع).',
+      whatEn: 'Turn catalog group services into live hall sessions with capacity limits, weekly schedule slots, and assigned trainers.',
+      nextStepAr: 'بعد ضبط الجدول ⬅️ ستظهر المواعيد فورياً للمشتركات في تطبيق الموبايل للحجز.',
+      nextStepEn: 'Once scheduled ⬅️ Members can instantly see and book slots via the mobile app.',
+      nextPath: null,
+      tipAr: '⚠️ قاعدة هامة: كل كلاس جماعي بيرتبط بخدمة واحدة بس من الكتالوج (الخدمة المستخدمة لا يمكن تكرارها لكلاس تاني).',
+      tipEn: '⚠️ Golden Rule: Each Class uniquely pairs with 1 Service (cannot reuse the same service for 2 classes).'
     },
-    {
-      id: 'massage',
-      path: '/massage',
+    massage: {
+      titleAr: 'أنت في: المساج والاستشفاء (جلسات التدليك 1:1)',
+      titleEn: 'You are in: Massage & Recovery (1-on-1 Therapy)',
       icon: Sparkles,
-      stepNum: '04',
-      badgeAr: 'تشغيل الاستشفاء',
-      badgeEn: 'Spa Operations',
-      titleAr: 'المساج والاستشفاء',
-      titleEn: 'Massage & Recovery',
-      roleAr: 'إدارة جلسات التدليك والأخصائيات 1:1',
-      roleEn: 'Specialist-driven 1-on-1 therapy bookings & execution',
-      descAr: 'شاشة تشغيلية وإدارية خاصة فقط بخدمات وجلسات التدليك والاستشفاء. بتعرض خدمات المساج المتاحة في الفرع، والمواعيد والجلسات المحجوزة مع الأخصائيات، ومتابعة تنفيذها وحضورها أو إلغائها.',
-      descEn: 'Dedicated desk for massage therapies: lists branch treatments, therapist bookings, session execution tracking, and attendance/cancellation records.',
-      exampleAr: 'حجز جلسة Swedish Massage لمدة 45 دقيقة مع الأخصائية في فرع المعادي.',
-      exampleEn: 'Book Swedish Massage 45 min with Therapist at Maadi branch.',
-      actionHintAr: 'تأكد من تسجيل الأخصائية وربطها بالفرع لتفعيل الحجوزات.',
-      actionHintEn: 'Ensure therapists are registered and assigned to branch.'
+      color: 'pink',
+      whatAr: 'شاشة تشغيلية خاصة بجلسات التدليك: متابعة المواعيد المحجوزة مع الأخصائيات، وتأكيد الحضور أو الإلغاء، وإضافة خدمات مساج جديدة للفرع.',
+      whatEn: 'Dedicated desk for massage therapies: manage bookings with therapists, track attendance, and add branch therapies.',
+      nextStepAr: 'تأكد أن الأخصائية مسجلة ومربوطة بالفرع لتتمكن المشتركات من حجز الجلسات معها.',
+      nextStepEn: 'Ensure specialists are registered and assigned to this branch to accept bookings.',
+      nextPath: '/therapists',
+      tipAr: 'جلسات المساج فردية (1-on-1) وتحجز بالساعة مع الأخصائية.',
+      tipEn: 'Massage sessions are individual (1-on-1) and booked by duration slots.'
     },
-    {
-      id: 'private-training',
-      path: '/private-training',
+    'private-training': {
+      titleAr: 'أنت في: التدريب الخاص (جلسات المدربة الخاصة 1:1)',
+      titleEn: 'You are in: Private Training (1-on-1 Coach Sessions)',
       icon: Dumbbell,
-      stepNum: '05',
-      badgeAr: 'التدريب الخاص 1:1',
-      badgeEn: '1-on-1 Coaching',
-      titleAr: 'التدريب الخاص (PT)',
-      titleEn: 'Private Training',
-      roleAr: 'ربط المشتركة بالمدربة الخاصة بالساعة',
-      roleEn: '1-on-1 coach booking & quota deduction desk',
-      descAr: 'شاشة تشغيلية وإدارية لحصص التدريب الفردي (1-on-1 Sessions). ربط المشتركة بالمدربة الخاصة، وحجز مواعيد بالساعة، وتتبع استهلاك الجلسات المتبقية لكل عضوة من باقتها.',
-      descEn: 'Operational desk for 1-on-1 coaching: link members with private trainers, book hourly sessions, and monitor remaining quota deductions per member.',
-      exampleAr: 'حجز سيشن PT مع الكابتن سارة واستهلاك 1 جلسة من رصيد المشتركة.',
-      exampleEn: 'Book 1-on-1 session with Coach Sarah and deduct 1 session quota.',
-      actionHintAr: 'تأكد من وجود رصيد للمشتركة في باقتها أو حجز جلسة منفصلة.',
-      actionHintEn: 'Verify member has private training quota or purchase single session.'
+      color: 'amber',
+      whatAr: 'شاشة إدارة حصص التدريب الفردي: ربط المشتركة بمدربتها الخاصة، حجز المواعيد بالساعة، وتتبع استهلاك الجلسات من رصيد باقة العضوة.',
+      whatEn: '1-on-1 coaching desk: match members with private trainers, book hourly sessions, and deduct package quotas.',
+      nextStepAr: 'تأكد من وجود رصيد جلسات متبقي في اشتراك المشتركة قبل الحجز.',
+      nextStepEn: 'Verify the member has remaining session quota in their active subscription.',
+      nextPath: '/trainers',
+      tipAr: 'كل جلسة تدريب خاص بتخصم تلقائياً من رصيد حصص التدريب الخاص في باقة المشتركة.',
+      tipEn: 'Each completed session automatically deducts from the member private training package quota.'
     }
-  ];
+  };
 
-  const tips = [
-    {
-      titleAr: 'قاعدة عدم تكرار الكلاسات (Classes 1-to-1 Mapping)',
-      titleEn: 'Classes 1-to-1 Unique Service Mapping',
-      textAr: 'كل كلاس جماعي يرتبط بخدمة واحدة فقط من الكتالوج. إذا ظهرت رسالة خطأ، فهذا يعني أن الخدمة المختارة مرتبطة بالفعل بكلاس جماعي آخر.',
-      textEn: 'Each Group Class can only be mapped to ONE Service. If you receive an error, the selected service is already tied to another existing class.'
-    },
-    {
-      titleAr: 'تلقائية ربط الخدمات بالفروع (Branch Auto-Linking)',
-      titleEn: 'Automatic Branch Service Linking',
-      textAr: 'الخدمات المضافة في الكتالوج تُربط تلقائياً بجميع الفروع لتكون جاهزة للحجز أو الجدولة فور إنشائها بدون خطوات معقدة.',
-      textEn: 'Services created in catalog are automatically linked to active branches so they are immediately available for schedules & bookings.'
-    },
-    {
-      titleAr: 'منع التعارض في المواعيد والجداول (Schedule Conflict Prevention)',
-      titleEn: 'Schedule Collision Prevention',
-      textAr: 'لا يمكن إضافة موعدين لنفس الكلاس في نفس الفرع واليوم ونفس وقت البدء. تأكد من تعديل الوقت أو اختيار مدربة أخرى.',
-      textEn: 'Two schedule slots cannot share the same class, branch, day of week, and start time. Adjust start time or day if conflict occurs.'
-    }
-  ];
+  const current = pageGuides[currentPage] || pageGuides.services;
+  const CurrentIcon = current.icon;
 
   return (
-    <div className="bg-gradient-to-br from-white via-slate-50/70 to-emerald-50/30 rounded-[28px] border border-slate-200/80 p-6 shadow-sm font-inter mb-8 transition-all">
-      {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20 shadow-sm">
-            <BookOpenCheck className="w-5 h-5" />
+    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm font-inter mb-6 overflow-hidden transition-all">
+      {/* Top Header Bar */}
+      <div className="bg-slate-50/80 px-6 py-3.5 border-b border-slate-200/70 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center">
+            <Compass className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-black text-slate-800 tracking-tight">
-                {lang === 'ar' ? 'دليل هيكلة وتدفق الخدمات في النادي' : 'Club Services & Catalog Architecture'}
-              </h3>
-              <span className="px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[9px] font-black uppercase tracking-wider">
-                {lang === 'ar' ? 'خريطة النظام' : 'Workflow Map'}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+            <span className="text-xs font-black text-slate-800 tracking-tight">
+              {lang === 'ar' ? 'دليل الخدمات السريع' : 'Services Quick Guide'}
+            </span>
+            <span className="mx-2 text-slate-300">|</span>
+            <span className="text-[11px] text-slate-500 font-medium">
               {lang === 'ar' 
-                ? 'توضيح الفرق والعلاقة بين التصنيفات، الكتالوج، الكلاسات، المساج، والتدريب الخاص لتفادي أخطاء الإضافة'
-                : 'Clear distinction between Categories, Catalog, Classes, Massage & Private Training to prevent ADD errors'
-              }
-            </p>
+                ? '3 خطوات بسيطة لإضافة أي نشاط بدون أي لخبطة' 
+                : '3 simple steps to add and manage club offerings smoothly'}
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Language toggle */}
+          {/* View mode switcher */}
+          <div className="bg-white p-0.5 rounded-xl border border-slate-200 flex items-center text-[10px] font-bold">
+            <button
+              type="button"
+              onClick={() => setViewMode('focused')}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                viewMode === 'focused' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Eye className="w-3 h-3" />
+              <span>{lang === 'ar' ? 'شرح الصفحة الحالية' : 'Current Page'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('pipeline')}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                viewMode === 'pipeline' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <GitFork className="w-3 h-3" />
+              <span>{lang === 'ar' ? 'خريطة الخطوات الـ 3' : '3-Step Pipeline'}</span>
+            </button>
+          </div>
+
+          {/* Lang toggle */}
           <button
             type="button"
             onClick={toggleLang}
-            className="h-9 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-all"
-            title="تبديل اللغة / Toggle Language"
+            className="h-8 px-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 text-[10px] font-bold flex items-center gap-1"
           >
-            <Languages className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
+            <Languages className="w-3 h-3 text-emerald-600" />
+            <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
           </button>
 
-          {/* Collapse toggle */}
+          {/* Collapse */}
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="h-9 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-all"
+            className="h-8 px-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-[10px] font-bold flex items-center gap-1"
           >
-            {collapsed ? (
-              <>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-                <span>{lang === 'ar' ? 'عرض الشرح والتفاصيل' : 'Expand Guide'}</span>
-              </>
-            ) : (
-              <>
-                <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
-                <span>{lang === 'ar' ? 'تصغير الدليل' : 'Minimize'}</span>
-              </>
-            )}
+            {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            <span>{collapsed ? (lang === 'ar' ? 'إظهار' : 'Show') : (lang === 'ar' ? 'إخفاء' : 'Hide')}</span>
           </button>
         </div>
       </div>
 
-      {/* Collapsed quick strip */}
-      {collapsed ? (
-        <div className="pt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-              {lang === 'ar' ? 'التسلسل المنطقي:' : 'Hierarchy:'}
-            </span>
-            {domains.map((d, i) => (
-              <div key={d.id} className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => navigate(d.path)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 ${
-                    currentPage === d.id
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  <span>{lang === 'ar' ? d.titleAr : d.titleEn}</span>
-                  {currentPage === d.id && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />}
-                </button>
-                {i < domains.length - 1 && (
-                  <span className="text-slate-300 text-xs font-black">→</span>
+      {/* Body Content */}
+      {!collapsed && (
+        <div className="p-6">
+          {viewMode === 'focused' ? (
+            /* Mode 1: Clean, focused explanation for the current page only */
+            <div className="flex flex-col lg:flex-row items-stretch gap-6">
+              {/* Left/Main explanation */}
+              <div className="flex-1 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                    <CurrentIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-800">
+                      {lang === 'ar' ? current.titleAr : current.titleEn}
+                    </h3>
+                    <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
+                      {lang === 'ar' ? current.whatAr : current.whatEn}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Golden Tip Box */}
+                <div className="p-3.5 bg-amber-50/80 border border-amber-200/70 rounded-2xl flex items-start gap-2.5 text-xs">
+                  <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-amber-900 font-semibold leading-relaxed">
+                    {lang === 'ar' ? current.tipAr : current.tipEn}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right: What to do next */}
+              <div className="lg:w-80 bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>{lang === 'ar' ? 'خطوتك التالية' : 'Next Step'}</span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 leading-relaxed">
+                    {lang === 'ar' ? current.nextStepAr : current.nextStepEn}
+                  </p>
+                </div>
+
+                {current.nextPath && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(current.nextPath)}
+                    className="mt-4 w-full h-9 bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 transition-all shadow-2xs"
+                  >
+                    <span>{lang === 'ar' ? 'الانتقال للخطوة التالية' : 'Go to Next Screen'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 )}
               </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1"
-          >
-            <span>{lang === 'ar' ? 'كيف ترتبط هذه الأقسام ببعضها؟' : 'How are these linked?'}</span>
-            <ExternalLink className="w-3 h-3" />
-          </button>
-        </div>
-      ) : (
-        /* Expanded full view */
-        <div className="pt-5 space-y-6">
-          {/* The 5 Domain Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
-            {domains.map((d) => {
-              const IconComp = d.icon;
-              const isCurrent = currentPage === d.id;
-
-              return (
-                <div
-                  key={d.id}
-                  onClick={() => {
-                    if (!isCurrent) navigate(d.path);
-                  }}
-                  className={`relative rounded-2xl p-4 border transition-all cursor-pointer flex flex-col justify-between ${
-                    isCurrent
-                      ? 'bg-white border-emerald-500 shadow-md ring-2 ring-emerald-500/20 -translate-y-0.5'
-                      : 'bg-white/80 hover:bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-sm'
+            </div>
+          ) : (
+            /* Mode 2: The 3-Step Simple Pipeline Map */
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Step 1: Category */}
+                <div 
+                  onClick={() => navigate('/categories')}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    currentPage === 'categories'
+                      ? 'bg-blue-50/70 border-blue-400 ring-2 ring-blue-400/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <div>
-                    {/* Top step badge */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                        isCurrent 
-                          ? 'bg-emerald-600 text-white' 
-                          : 'bg-slate-100 text-slate-600'
-                      }` }>
-                        <IconComp className="w-4 h-4" />
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <span className="text-[9px] font-black text-slate-400">
-                          {d.stepNum}
-                        </span>
-                        {isCurrent && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase tracking-wider animate-pulse">
-                            {lang === 'ar' ? 'أنت هنا' : 'Active'}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Badge */}
-                    <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[9px] font-bold mb-1.5">
-                      {lang === 'ar' ? d.badgeAr : d.badgeEn}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black text-blue-600 bg-blue-100/70 px-2 py-0.5 rounded-md">
+                      {lang === 'ar' ? 'خطوة 1: القسم' : 'Step 1: Section'}
                     </span>
-
-                    {/* Title */}
-                    <h4 className="text-xs font-black text-slate-800 leading-snug">
-                      {lang === 'ar' ? d.titleAr : d.titleEn}
-                    </h4>
-
-                    {/* Role */}
-                    <p className="text-[10px] font-bold text-emerald-600 mt-1">
-                      {lang === 'ar' ? d.roleAr : d.roleEn}
-                    </p>
-
-                    {/* Description */}
-                    <p className="text-[10.5px] text-slate-500 font-medium mt-2 leading-relaxed">
-                      {lang === 'ar' ? d.descAr : d.descEn}
-                    </p>
+                    <Layers className="w-4 h-4 text-blue-600" />
                   </div>
+                  <h4 className="text-xs font-black text-slate-800">
+                    {lang === 'ar' ? 'تصنيفات الخدمات' : 'Categories'}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 leading-relaxed">
+                    {lang === 'ar' 
+                      ? 'اعمل القسم واختار أيقونته (زي: كلاسات جماعية، مساج، تدريب خاص) عشان تنظم شكل التطبيق.'
+                      : 'Create logical umbrella categories with mobile icons (e.g. Classes, Spa, PT).'}
+                  </p>
+                </div>
 
-                  {/* Example & Footer */}
-                  <div className="mt-4 pt-3 border-t border-slate-100/80">
-                    <p className="text-[9.5px] font-semibold text-slate-400 italic">
-                      {lang === 'ar' ? d.exampleAr : d.exampleEn}
-                    </p>
-                    <div className="mt-2 text-[9px] font-bold text-emerald-700 bg-emerald-50/70 p-1.5 rounded-lg">
-                      {lang === 'ar' ? d.actionHintAr : d.actionHintEn}
+                {/* Step 2: Catalog */}
+                <div 
+                  onClick={() => navigate('/services')}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    currentPage === 'services'
+                      ? 'bg-emerald-50/70 border-emerald-400 ring-2 ring-emerald-400/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                      {lang === 'ar' ? 'خطوة 2: الاسم والسعر' : 'Step 2: Service & Price'}
+                    </span>
+                    <BookOpenCheck className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <h4 className="text-xs font-black text-slate-800">
+                    {lang === 'ar' ? 'كتالوج الخدمات' : 'Services Catalog'}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 leading-relaxed">
+                    {lang === 'ar' 
+                      ? 'اكتب اسم الحصة ومدتها وسعرها (مثال: يوغا - 60 دقيقة - 200 ج)، وحدد نوعها الفني.'
+                      : 'Define raw service: name, duration in mins, price, and technical type.'}
+                  </p>
+                </div>
+
+                {/* Step 3: Schedules & Operations */}
+                <div className="p-4 rounded-2xl border bg-white border-slate-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black text-purple-600 bg-purple-100/70 px-2 py-0.5 rounded-md">
+                      {lang === 'ar' ? 'خطوة 3: المواعيد والتشغيل' : 'Step 3: Operations'}
+                    </span>
+                    <Calendar className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <h4 className="text-xs font-black text-slate-800">
+                    {lang === 'ar' ? 'تحديد المواعيد والصالة' : 'Schedule & Staff'}
+                  </h4>
+                  <div className="text-[11px] text-slate-600 font-medium mt-2 space-y-1.5">
+                    <div 
+                      onClick={() => navigate('/classes')}
+                      className="p-1.5 rounded-lg bg-slate-50 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-all flex items-center justify-between"
+                    >
+                      <span>🏋️ {lang === 'ar' ? 'كلاس جماعي ⬅️ الصالة وجدول الأسبوع' : 'Group Class ➔ Weekly Schedule'}</span>
+                      <ArrowRight className="w-3 h-3 text-slate-400" />
+                    </div>
+                    <div 
+                      onClick={() => navigate('/massage')}
+                      className="p-1.5 rounded-lg bg-slate-50 hover:bg-pink-50 hover:text-pink-700 cursor-pointer transition-all flex items-center justify-between"
+                    >
+                      <span>💆 {lang === 'ar' ? 'مساج ⬅️ الأخصائية ومواعيد الحجز' : 'Massage ➔ Therapist & Slot'}</span>
+                      <ArrowRight className="w-3 h-3 text-slate-400" />
+                    </div>
+                    <div 
+                      onClick={() => navigate('/private-training')}
+                      className="p-1.5 rounded-lg bg-slate-50 hover:bg-amber-50 hover:text-amber-700 cursor-pointer transition-all flex items-center justify-between"
+                    >
+                      <span>🎯 {lang === 'ar' ? 'تدريب خاص ⬅️ المدربة وسيشن 1:1' : 'PT ➔ 1-on-1 Coach & Session'}</span>
+                      <ArrowRight className="w-3 h-3 text-slate-400" />
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
 
-          {/* Quick Pitfalls & Prevention Tips Banner */}
-          <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-amber-600" />
-              <h4 className="text-xs font-black text-amber-900 uppercase tracking-wider">
-                {lang === 'ar' ? 'إرشادات هامة لتفادي أخطاء الإضافة الشائعة' : 'Crucial Rules to Prevent ADD Failures'}
-              </h4>
+              {/* Bottom One-liner */}
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span className="font-bold">
+                  {lang === 'ar' 
+                    ? '💡 الخلاصة: بتعمل (القسم) ➔ بعدين تحط جواه (الخدمة وسعرها) ➔ بعدين تحط لها (المواعيد والمدربة).' 
+                    : '💡 Summary: Create (Section) ➔ Add (Service & Price) ➔ Assign (Schedule & Staff).'}
+                </span>
+                <span className="text-[11px] text-brand-green font-black">
+                  {lang === 'ar' ? 'نظام تونس الرياضي' : 'Tounos System'}
+                </span>
+              </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {tips.map((t, idx) => (
-                <div key={idx} className="bg-white/90 p-3 rounded-xl border border-amber-100 text-[10.5px]">
-                  <p className="font-bold text-slate-800 mb-1">
-                    {lang === 'ar' ? t.titleAr : t.titleEn}
-                  </p>
-                  <p className="text-slate-600 font-medium leading-relaxed">
-                    {lang === 'ar' ? t.textAr : t.textEn}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       )}
     </div>

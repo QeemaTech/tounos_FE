@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { servicesApi, serviceCategoriesApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import { LayoutList, DollarSign, Type, FileText, Folder } from 'lucide-react';
+import { LayoutList, DollarSign, Type, FileText, Folder, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateServiceModal({ open, onClose }) {
