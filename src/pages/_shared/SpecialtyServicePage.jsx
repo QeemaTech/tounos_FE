@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import PageHeader from '../../components/layout/PageHeader';
+import CatalogHierarchyGuide from '../../components/ui/CatalogHierarchyGuide';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Dropdown from '../../components/ui/Dropdown';

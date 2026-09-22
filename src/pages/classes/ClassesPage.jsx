@@ -15,7 +15,7 @@ import CreateClassModal from './CreateClassModal';
 import AddScheduleModal from './AddScheduleModal';
 import { useBranchScope } from '../../hooks/useBranchScope';
 import { toast } from 'react-hot-toast';
-import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
+import CatalogHierarchyGuide from '../../components/ui/CatalogHierarchyGuide';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 const DAY_SHORT = { MONDAY: 'Mon', TUESDAY: 'Tue', WEDNESDAY: 'Wed', THURSDAY: 'Thu', FRIDAY: 'Fri', SATURDAY: 'Sat', SUNDAY: 'Sun' };
@@ -105,7 +105,7 @@ export default function ClassesPage() {
         }
       />
 
-      <ServiceSetupStepper activeStep={tab === 'classes' ? 3 : 4} />
+      <CatalogHierarchyGuide currentPage="classes" />
 
       {/* Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">

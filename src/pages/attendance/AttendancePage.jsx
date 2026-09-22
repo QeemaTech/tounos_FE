@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Search, Calendar, GitBranch, UserCheck,
+  Search, Calendar, GitBranch, UserCheck, Zap,
   Camera, Check, AlertTriangle, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -42,14 +43,23 @@ export default function AttendancePage() {
         subtitle="Manage member entry logs and verify attendance QR codes"
         breadcrumbs={[{ label: 'Attendance' }]}
         actions={
-          <button
-            onClick={() => setIsScanModalOpen(true)}
-            className="bg-brand-green hover:bg-[#082a10] text-white !rounded-2xl !py-2.5 !px-4 md:!py-3 md:!px-6 shadow-lg shadow-brand-green/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5 text-sm md:text-base"
-          >
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/reception-kiosk"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white !rounded-2xl !py-2.5 !px-4 md:!py-3 md:!px-5 shadow-lg shadow-emerald-600/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5 text-sm md:text-base"
+            >
+              <Zap className="w-4 h-4 md:w-5 md:h-5 text-amber-300 fill-amber-300" />
+              <span>Reception Kiosk ⚡</span>
+            </Link>
+            <button
+              onClick={() => setIsScanModalOpen(true)}
+              className="bg-brand-green hover:bg-[#082a10] text-white !rounded-2xl !py-2.5 !px-4 md:!py-3 md:!px-6 shadow-lg shadow-brand-green/20 flex items-center gap-2 font-bold transition-all transform hover:-translate-y-0.5 text-sm md:text-base"
+            >
             <Camera className="w-4 h-4 md:w-5 md:h-5" />
             <span className="hidden sm:inline">Scan QR Code</span>
             <span className="sm:hidden">Scan QR</span>
           </button>
+          </div>
         }
       />
 

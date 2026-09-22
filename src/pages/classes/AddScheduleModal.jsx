@@ -78,7 +78,8 @@ export default function AddScheduleModal({ open, onClose, scheduleToEdit = null,
   const onSubmit = (data) => {
     mutation.mutate({
       ...data,
-      capacity: Number(data.capacity)
+      trainerId: data.trainerId ? data.trainerId : null,
+      capacity: Number(data.capacity) || 20
     });
   };
 

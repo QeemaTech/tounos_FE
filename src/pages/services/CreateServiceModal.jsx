@@ -78,6 +78,18 @@ export default function CreateServiceModal({ open, onClose }) {
   return (
     <Modal open={open} onClose={onClose} title="Define Global Catalog Service" size="lg">
       <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
+        {/* serviceCatalogExplainer */}
+        <div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
+          <Info className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+          <div className="text-[11px] leading-relaxed">
+            <p className="font-black text-emerald-900">
+              كتالوج الخدمات هو القاموس المرجعي لكل نشاط أو خدمة يقدمها النادي
+            </p>
+            <p className="text-emerald-700 mt-0.5">
+              (Group Class: يُحدد لها جدول في الكلاسات | Massage: تُحجز مع الأخصائيات | Private Training: تُربط بالمدربة 1:1)
+            </p>
+          </div>
+        </div>
         
         <div className="grid grid-cols-2 gap-6">
           {/* Service Name (English) */}

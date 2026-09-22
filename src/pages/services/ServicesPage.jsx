@@ -12,7 +12,7 @@ import {
   LayoutList, Type, DollarSign, Activity 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
+import CatalogHierarchyGuide from '../../components/ui/CatalogHierarchyGuide';
 
 export default function ServicesPage() {
   const queryClient = useQueryClient();
@@ -54,7 +54,7 @@ export default function ServicesPage() {
         }
       />
 
-      <ServiceSetupStepper activeStep={2} />
+      <CatalogHierarchyGuide currentPage="services" />
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden">
         {isLoading ? (

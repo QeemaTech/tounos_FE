@@ -68,7 +68,7 @@ export const bookingsApi = {
 export const attendanceApi = {
   ...createCrudApi('attendance'),
   manualCheckIn: (data) => client.post('/admin/attendance/manual', data),
-  validateQR: (qrData) => client.post('/admin/attendance/validate-qr', { qrData }),
+  validateQR: (qrData, options = {}) => client.post('/admin/attendance/validate-qr', typeof qrData === 'object' ? qrData : { qrData, ...options }),
   qrCheckIn: (payload) =>
     client.post(
       '/admin/attendance/qr-check-in',

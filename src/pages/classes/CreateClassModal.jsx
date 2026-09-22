@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { classesApi, servicesApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import { Box, Clock, Users, Layers, Activity } from 'lucide-react';
+import { Box, Clock, Users, Layers, Activity, Info } from 'lucide-react';
 
 export default function CreateClassModal({ open, onClose, classToEdit = null }) {
   const qc = useQueryClient();
@@ -19,6 +19,19 @@ export default function CreateClassModal({ open, onClose, classToEdit = null }) 
       description: ''
     }
   });
+
+  // Fetch existing classes to prevent duplicate serviceId mapping
+  const { data: existingClasses } = useQuery({
+    queryKey: ['classes-summary-for-modal'],
+    queryFn: () => classesApi.list({ pageSize: 200 }).then(r => r.data.data),
+    enabled: open
+  });
+  const usedServiceIds = new Set(
+    (existingClasses || [])
+      .filter(c => c.id !== classToEdit?.id)
+      .map(c => c.serviceId)
+      .filter(Boolean)
+  );
 
   // Fetch Services (Filtered by Group Class type)
   const { data: services } = useQuery({
@@ -76,6 +89,18 @@ export default function CreateClassModal({ open, onClose, classToEdit = null }) 
   return (
     <Modal open={open} onClose={onClose} title={classToEdit ? "Edit Group Class" : "Create New Group Class"} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6 font-inter">
+        {/* Bilingual Helper Notice */}
+        <div className="p-4 bg-blue-50/80 border border-blue-200/80 rounded-2xl flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+          <div className="text-[11px] leading-relaxed">
+            <p className="font-black text-blue-900">
+              قاعدة هامة: كل كلاس جماعي يرتبط بخدمة واحدة فقط من الكتالوج (1-to-1)
+            </p>
+            <p className="text-blue-700 mt-0.5">
+              Each Group Class uniquely maps to a single Service. Services already assigned to other classes are marked to avoid duplicate errors.
+            </p>
+          </div>
+        </div>
         
         <div className="grid grid-cols-2 gap-6">
           {/* Name */}
@@ -101,7 +126,14 @@ export default function CreateClassModal({ open, onClose, classToEdit = null }) 
               className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-green/10 appearance-none"
             >
               <option value="">Select Service Type...</option>
-              {services?.map(s => <option key={s.id} value={s.id}>{s.name} (EGP {s.price})</option>)}
+              {services?.map(s => {
+                const isTaken = usedServiceIds.has(s.id);
+                return (
+                  <option key={s.id} value={s.id} disabled={isTaken}>
+                    {s.name} (EGP {s.price}) {isTaken ? '⚠️ [مستخدم بالفعل لكلاس آخر / Already Assigned]' : ''}
+                  </option>
+                );
+              })}
             </select>
             {errors.serviceId && <p className="text-[10px] text-red-500 font-black uppercase">{errors.serviceId.message}</p>}
           </div>

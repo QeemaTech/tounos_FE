@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { serviceCategoriesApi } from '../../api/endpoints';
 import Modal from '../../components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import { Folder, FileText, Hash, Activity } from 'lucide-react';
+import { Folder, FileText, Hash, Activity, Info } from 'lucide-react';
 
 export default function CreateCategoryModal({ open, onClose }) {
   const queryClient = useQueryClient();
@@ -50,6 +50,18 @@ export default function CreateCategoryModal({ open, onClose }) {
   return (
     <Modal open={open} onClose={onClose} title="New Logical Category" size="lg">
       <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="p-8 space-y-6 font-inter">
+        {/* categoryExplainer */}
+        <div className="p-4 bg-slate-100/90 border border-slate-200 rounded-2xl flex items-start gap-3">
+          <Info className="w-5 h-5 text-slate-700 mt-0.5 shrink-0" />
+          <div className="text-[11px] leading-relaxed">
+            <p className="font-black text-slate-900">
+              التصنيف هو المظلة الكبيرة (مثل: الحصص الجماعية، المساج والاستشفاء، التدريب الخاص)
+            </p>
+            <p className="text-slate-600 mt-0.5">
+              تنظيم الأقسام الرئيسية وإعطاء شكل وأيقونة وتنسيق لكل قسم بالتطبيق والداشبورد.
+            </p>
+          </div>
+        </div>
         
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">

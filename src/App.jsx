@@ -33,6 +33,7 @@ import TrainerProfilePage from './pages/trainers/TrainerProfilePage';
 import TherapistProfilePage from './pages/therapists/TherapistProfilePage';
 import AdminsPage from './pages/admins/AdminsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
+import ReceptionKioskPage from './pages/attendance/ReceptionKioskPage';
 import AuditLogsPage from './pages/audit-logs/AuditLogsPage';
 import MassagePage from './pages/massage/MassagePage';
 import PrivateTrainingPage from './pages/private-training/PrivateTrainingPage';
@@ -78,6 +79,7 @@ export default function App() {
           <Toaster position="top-right" reverseOrder={false} />
           <Routes>
             <Route path="/login" element={<GuestGuard><LoginPage /></GuestGuard>} />
+            <Route path="/reception-kiosk" element={<AuthGuard><ReceptionKioskPage /></AuthGuard>} />
 
             <Route element={<AuthGuard><AdminLayout /></AuthGuard>}>
               <Route index element={<DashboardPage />} />

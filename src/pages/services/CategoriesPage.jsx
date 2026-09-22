@@ -12,7 +12,7 @@ import {
   Folder, Activity, Layers 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import ServiceSetupStepper from '../../components/ui/ServiceSetupStepper';
+import CatalogHierarchyGuide from '../../components/ui/CatalogHierarchyGuide';
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
@@ -54,7 +54,7 @@ export default function CategoriesPage() {
         }
       />
 
-      <ServiceSetupStepper activeStep={1} />
+      <CatalogHierarchyGuide currentPage="categories" />
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden">
         {isLoading ? (
